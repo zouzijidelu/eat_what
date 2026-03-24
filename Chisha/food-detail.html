@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>食物详情 - 吃啥</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                50: "#fff1f5",
+                100: "#ffe4ec",
+                500: "#ff4d7d",
+                600: "#ff2f6d",
+              },
+              ink: "#1f2430",
+            },
+            boxShadow: {
+              card: "0 10px 30px -18px rgba(31,36,48,.25)",
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .clamp-2,
+      .clamp-3 {
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+      .clamp-2 {
+        -webkit-line-clamp: 2;
+      }
+      .clamp-3 {
+        -webkit-line-clamp: 3;
+      }
+      .soft-ring {
+        box-shadow: 0 0 0 1px rgba(255, 77, 125, 0.18) inset;
+      }
+    </style>
+  </head>
+
+  <body class="min-h-dvh bg-gradient-to-b from-rose-50 via-white to-white text-[color:var(--tw-color-ink,theme(colors.ink))]">
+    <div class="mx-auto max-w-md px-4 pb-10 pt-4">
+      <!-- 顶部：返回 + 标题 -->
+      <header class="flex items-center gap-3">
+        <a
+          href="./index.html"
+          class="grid h-10 w-10 place-items-center rounded-full bg-white/90 shadow-sm ring-1 ring-rose-100/80 backdrop-blur active:scale-[0.98]"
+          aria-label="返回首页"
+        >
+          <span class="text-lg leading-none">‹</span>
+        </a>
+        <div class="min-w-0">
+          <h1 class="truncate text-[18px] font-extrabold tracking-tight">牛油果</h1>
+        </div>
+      </header>
+
+      <!-- 食物信息：左图右文（圆形图） -->
+      <section class="mt-4 overflow-hidden rounded-[28px] bg-white/90 shadow-card ring-1 ring-rose-100/70">
+        <div class="p-4">
+          <div class="flex gap-3">
+            <div class="shrink-0">
+              <img
+                class="h-24 w-24 rounded-full object-cover ring-1 ring-rose-100/70"
+                src="https://placehold.co/240x240/png?text=%E9%A3%9F%E7%89%A9"
+                alt="牛油果 图片"
+                loading="lazy"
+              />
+            </div>
+            <div class="min-w-0 flex-1 self-center">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="rounded-full bg-brand-50 px-2 py-0.5 text-xs font-semibold text-brand-600 soft-ring">优质脂肪</span>
+                <span class="rounded-full bg-slate-50 px-2 py-0.5 text-xs font-semibold text-slate-700 ring-1 ring-slate-200/80">百搭</span>
+                <span class="rounded-full bg-slate-50 px-2 py-0.5 text-xs font-semibold text-slate-700 ring-1 ring-slate-200/80">饱腹</span>
+              </div>
+              <h2 class="mt-2 truncate text-base font-extrabold">牛油果</h2>
+              <p class="mt-1 clamp-2 text-sm text-slate-600">口感细腻像黄油，适合做沙拉、吐司或奶昔。占位文案可替换。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 营养素：方形排版，上图标下信息 -->
+      <section class="mt-4">
+        <div class="mb-3">
+          <h2 class="text-base font-extrabold tracking-tight">营养素</h2>
+          <p class="mt-1 text-xs text-slate-500">每 100g 含量</p>
+        </div>
+
+        <div class="grid grid-cols-4 gap-2">
+          <article class="rounded-3xl bg-white p-2 text-center shadow-sm ring-1 ring-rose-100/70">
+            <div class="mx-auto grid h-9 w-9 place-items-center rounded-2xl bg-brand-50 text-brand-600 soft-ring">🔥</div>
+            <p class="mt-1 text-[10px] text-slate-500">热量</p>
+            <p class="mt-0.5 text-[12px] font-extrabold text-slate-800">160kcal</p>
+          </article>
+          <article class="rounded-3xl bg-white p-2 text-center shadow-sm ring-1 ring-rose-100/70">
+            <div class="mx-auto grid h-9 w-9 place-items-center rounded-2xl bg-slate-50 text-slate-700 ring-1 ring-slate-200/70">🍗</div>
+            <p class="mt-1 text-[10px] text-slate-500">蛋白质</p>
+            <p class="mt-0.5 text-[12px] font-extrabold text-slate-800">2g</p>
+          </article>
+          <article class="rounded-3xl bg-white p-2 text-center shadow-sm ring-1 ring-rose-100/70">
+            <div class="mx-auto grid h-9 w-9 place-items-center rounded-2xl bg-slate-50 text-slate-700 ring-1 ring-slate-200/70">🍚</div>
+            <p class="mt-1 text-[10px] text-slate-500">碳水</p>
+            <p class="mt-0.5 text-[12px] font-extrabold text-slate-800">9g</p>
+          </article>
+          <article class="rounded-3xl bg-white p-2 text-center shadow-sm ring-1 ring-rose-100/70">
+            <div class="mx-auto grid h-9 w-9 place-items-center rounded-2xl bg-slate-50 text-slate-700 ring-1 ring-slate-200/70">🥑</div>
+            <p class="mt-1 text-[10px] text-slate-500">脂肪</p>
+            <p class="mt-0.5 text-[12px] font-extrabold text-slate-800">15g</p>
+          </article>
+        </div>
+      </section>
+
+      <!-- 推荐吃法：左图右文 -->
+      <section class="mt-6">
+        <div class="mb-3">
+          <h2 class="text-base font-extrabold tracking-tight">推荐吃法</h2>
+        </div>
+
+        <div class="space-y-3">
+          <article class="flex gap-3 rounded-[28px] bg-white p-4 shadow-sm ring-1 ring-rose-100/70">
+            <img
+              class="h-16 w-16 rounded-2xl object-cover ring-1 ring-rose-100/70"
+              src="https://placehold.co/200x200/png?text=%E5%90%83%E6%B3%95"
+              alt="牛油果吐司 图片"
+              loading="lazy"
+            />
+            <div class="min-w-0 flex-1">
+              <h3 class="truncate text-sm font-extrabold">牛油果吐司</h3>
+              <p class="mt-1 clamp-2 text-xs text-slate-600">压泥抹面包，撒黑胡椒和少许盐，再配一个溏心蛋更满足。</p>
+            </div>
+          </article>
+
+          <article class="flex gap-3 rounded-[28px] bg-white p-4 shadow-sm ring-1 ring-rose-100/70">
+            <img
+              class="h-16 w-16 rounded-2xl object-cover ring-1 ring-rose-100/70"
+              src="https://placehold.co/200x200/png?text=%E5%90%83%E6%B3%95"
+              alt="牛油果沙拉 图片"
+              loading="lazy"
+            />
+            <div class="min-w-0 flex-1">
+              <h3 class="truncate text-sm font-extrabold">清爽沙拉</h3>
+              <p class="mt-1 clamp-2 text-xs text-slate-600">与生菜、番茄、鸡胸肉搭配，淋柠檬汁或油醋汁即可。</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- 相关菜谱：左图右文 -->
+      <section class="mt-6">
+        <div class="mb-3 flex items-end justify-between">
+          <div>
+            <h2 class="text-base font-extrabold tracking-tight">相关菜谱</h2>
+          </div>
+          <a href="./recipe-detail.html" class="text-xs font-semibold text-brand-600">去看看 →</a>
+        </div>
+
+        <a
+          href="./recipe-detail.html"
+          class="flex gap-3 rounded-[28px] bg-white p-4 shadow-sm ring-1 ring-rose-100/70 active:scale-[0.995]"
+          aria-label="查看香煎鸡胸沙拉"
+        >
+          <img
+            class="h-16 w-16 rounded-2xl object-cover ring-1 ring-rose-100/70"
+            src="https://placehold.co/200x200/png?text=%E8%8F%9C%E8%B0%B1"
+            alt="香煎鸡胸沙拉 图片"
+            loading="lazy"
+          />
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center gap-2">
+              <h3 class="truncate text-sm font-extrabold">香煎鸡胸沙拉</h3>
+              <span class="rounded-full bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200/80">20 分钟</span>
+            </div>
+            <p class="mt-1 clamp-2 text-xs text-slate-600">清爽蔬菜 + 高蛋白搭配，适合轻食或训练日。</p>
+          </div>
+        </a>
+      </section>
+
+      <footer class="mt-8 text-center text-xs text-slate-400">
+        <p>页面为静态占位，可继续扩展为多食物详情</p>
+      </footer>
+    </div>
+  </body>
+</html>
+

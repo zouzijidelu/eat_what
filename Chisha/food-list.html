@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>食物分类 - 吃啥</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                50: "#fff1f5",
+                100: "#ffe4ec",
+                500: "#ff4d7d",
+                600: "#ff2f6d",
+              },
+              ink: "#1f2430",
+            },
+            boxShadow: {
+              card: "0 10px 30px -18px rgba(31,36,48,.25)",
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+      .soft-ring {
+        box-shadow: 0 0 0 1px rgba(255, 77, 125, 0.18) inset;
+      }
+      .clamp-2 {
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+
+  <body class="min-h-dvh bg-gradient-to-b from-rose-50 via-white to-white text-[color:var(--tw-color-ink,theme(colors.ink))]">
+    <div class="mx-auto max-w-md px-4 pb-10 pt-4">
+      <!-- 顶部：返回 + 标题 -->
+      <header class="flex items-center gap-3">
+        <a
+          href="./index.html"
+          class="grid h-10 w-10 place-items-center rounded-full bg-white/90 shadow-sm ring-1 ring-rose-100/80 backdrop-blur active:scale-[0.98]"
+          aria-label="返回首页"
+        >
+          <span class="text-lg leading-none">‹</span>
+        </a>
+        <div class="min-w-0">
+          <h1 class="truncate text-[18px] font-extrabold tracking-tight">食物分类</h1>
+        </div>
+      </header>
+
+      <!-- 左侧一级分类 Tab + 右侧二级分类 -->
+      <section class="mt-4 overflow-hidden rounded-[28px] bg-white/90 shadow-card ring-1 ring-rose-100/70">
+        <div class="flex min-h-[520px]">
+          <!-- 一级分类 -->
+          <aside class="w-[92px] border-r border-rose-100/70 bg-gradient-to-b from-white to-rose-50/30">
+            <div id="primaryTabs" class="no-scrollbar max-h-[520px] overflow-y-auto p-2">
+              <!-- tabs injected -->
+            </div>
+          </aside>
+
+          <!-- 二级分类 -->
+          <main class="min-w-0 flex-1 p-3">
+            <div class="flex items-center justify-between">
+              <div class="min-w-0">
+                <h2 id="primaryTitle" class="truncate text-sm font-extrabold">—</h2>
+                <p class="mt-0.5 text-[11px] text-slate-500">选择左侧分类查看二级分类</p>
+              </div>
+              <a
+                href="./food-detail.html"
+                class="shrink-0 rounded-full bg-brand-50 px-2 py-1 text-[11px] font-semibold text-brand-600 soft-ring"
+                aria-label="去食物详情示例"
+                >示例详情 →</a
+              >
+            </div>
+
+            <div id="secondaryGrid" class="mt-3 grid grid-cols-3 gap-2">
+              <!-- secondary injected -->
+            </div>
+          </main>
+        </div>
+      </section>
+
+      <footer class="mt-6 text-center text-xs text-slate-400">
+        <p>图片为占位图；可接入真实分类数据</p>
+      </footer>
+    </div>
+
+    <script>
+      (function () {
+        const data = [
+          {
+            id: "fruit",
+            name: "水果",
+            items: [
+              { name: "莓果类", desc: "蓝莓 / 草莓 / 覆盆子", img: "https://placehold.co/256x256/png?text=%E6%B0%B4%E6%9E%9C" },
+              { name: "热带水果", desc: "芒果 / 菠萝 / 牛油果", img: "https://placehold.co/256x256/png?text=%E6%B0%B4%E6%9E%9C" },
+              { name: "柑橘类", desc: "橙子 / 柠檬 / 柚子", img: "https://placehold.co/256x256/png?text=%E6%B0%B4%E6%9E%9C" },
+              { name: "应季精选", desc: "当季更好吃", img: "https://placehold.co/256x256/png?text=%E6%B0%B4%E6%9E%9C" },
+            ],
+          },
+          {
+            id: "protein",
+            name: "蛋白质",
+            items: [
+              { name: "鱼虾贝", desc: "三文鱼 / 虾 / 扇贝", img: "https://placehold.co/256x256/png?text=%E8%9B%8B%E7%99%BD" },
+              { name: "禽肉", desc: "鸡胸 / 鸭胸", img: "https://placehold.co/256x256/png?text=%E8%9B%8B%E7%99%BD" },
+              { name: "蛋奶", desc: "鸡蛋 / 酸奶 / 奶酪", img: "https://placehold.co/256x256/png?text=%E8%9B%8B%E7%99%BD" },
+              { name: "豆制品", desc: "豆腐 / 豆浆 / 毛豆", img: "https://placehold.co/256x256/png?text=%E8%9B%8B%E7%99%BD" },
+            ],
+          },
+          {
+            id: "staple",
+            name: "主食",
+            items: [
+              { name: "米面", desc: "米饭 / 面条 / 米粉", img: "https://placehold.co/256x256/png?text=%E4%B8%BB%E9%A3%9F" },
+              { name: "全谷物", desc: "燕麦 / 糙米 / 藜麦", img: "https://placehold.co/256x256/png?text=%E4%B8%BB%E9%A3%9F" },
+              { name: "薯类", desc: "土豆 / 红薯", img: "https://placehold.co/256x256/png?text=%E4%B8%BB%E9%A3%9F" },
+              { name: "面包", desc: "吐司 / 全麦", img: "https://placehold.co/256x256/png?text=%E4%B8%BB%E9%A3%9F" },
+            ],
+          },
+          {
+            id: "veg",
+            name: "蔬菜",
+            items: [
+              { name: "叶菜", desc: "生菜 / 菠菜 / 油麦菜", img: "https://placehold.co/256x256/png?text=%E8%94%AC%E8%8F%9C" },
+              { name: "瓜茄", desc: "番茄 / 黄瓜 / 茄子", img: "https://placehold.co/256x256/png?text=%E8%94%AC%E8%8F%9C" },
+              { name: "菌菇", desc: "香菇 / 金针菇", img: "https://placehold.co/256x256/png?text=%E8%94%AC%E8%8F%9C" },
+              { name: "根茎", desc: "胡萝卜 / 白萝卜", img: "https://placehold.co/256x256/png?text=%E8%94%AC%E8%8F%9C" },
+            ],
+          },
+          {
+            id: "snack",
+            name: "零食",
+            items: [
+              { name: "坚果", desc: "杏仁 / 核桃 / 腰果", img: "https://placehold.co/256x256/png?text=%E9%9B%B6%E9%A3%9F" },
+              { name: "酸奶杯", desc: "酸奶 + 水果", img: "https://placehold.co/256x256/png?text=%E9%9B%B6%E9%A3%9F" },
+              { name: "低糖甜点", desc: "更轻的满足", img: "https://placehold.co/256x256/png?text=%E9%9B%B6%E9%A3%9F" },
+              { name: "小食", desc: "海苔 / 玉米片", img: "https://placehold.co/256x256/png?text=%E9%9B%B6%E9%A3%9F" },
+            ],
+          },
+        ];
+
+        const tabsEl = document.getElementById("primaryTabs");
+        const titleEl = document.getElementById("primaryTitle");
+        const gridEl = document.getElementById("secondaryGrid");
+
+        if (!tabsEl || !titleEl || !gridEl) return;
+
+        let activeId = data[0]?.id;
+
+        const tabClass = (active) =>
+          [
+            "w-full text-left rounded-2xl px-3 py-2.5 transition",
+            active ? "bg-brand-50 text-brand-600 soft-ring" : "bg-white/70 text-slate-700 ring-1 ring-slate-200/70",
+            "active:scale-[0.99]",
+          ].join(" ");
+
+        const renderTabs = () => {
+          tabsEl.innerHTML = data
+            .map(
+              (c) => `
+                <button type="button" class="${tabClass(c.id === activeId)}" data-id="${c.id}">
+                  <div class="text-[12px] font-extrabold">${c.name}</div>
+                </button>
+              `
+            )
+            .join("");
+        };
+
+        const renderSecondary = () => {
+          const c = data.find((x) => x.id === activeId) || data[0];
+          titleEl.textContent = c?.name ?? "—";
+          const items = c?.items ?? [];
+          gridEl.innerHTML = items
+            .map(
+              (i) => `
+              <a href="./food-items.html?c=${encodeURIComponent(i.name)}" class="group rounded-[22px] bg-white p-2 shadow-sm ring-1 ring-rose-100/70 active:scale-[0.995]" aria-label="进入${i.name}食物列表">
+                <img class="aspect-square w-full rounded-2xl object-cover ring-1 ring-rose-100/70" src="${i.img}" alt="${i.name} 图片" loading="lazy" />
+                <div class="mt-1.5">
+                  <p class="truncate text-[11px] font-extrabold">${i.name}</p>
+                  <p class="mt-0.5 clamp-2 text-[10px] leading-snug text-slate-500">${i.desc}</p>
+                </div>
+              </a>
+            `
+            )
+            .join("");
+        };
+
+        const setActive = (id) => {
+          activeId = id;
+          renderTabs();
+          renderSecondary();
+        };
+
+        tabsEl.addEventListener("click", (e) => {
+          const btn = e.target.closest("button[data-id]");
+          if (!btn) return;
+          const id = btn.getAttribute("data-id");
+          if (!id) return;
+          setActive(id);
+        });
+
+        setActive(activeId);
+      })();
+    </script>
+  </body>
+</html>
+

@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>菜谱详情 - 吃啥</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                50: "#fff1f5",
+                100: "#ffe4ec",
+                500: "#ff4d7d",
+                600: "#ff2f6d",
+              },
+              ink: "#1f2430",
+            },
+            boxShadow: {
+              card: "0 10px 30px -18px rgba(31,36,48,.25)",
+              lift: "0 14px 40px -22px rgba(31,36,48,.35)",
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .clamp-2,
+      .clamp-3 {
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+      .clamp-2 {
+        -webkit-line-clamp: 2;
+      }
+      .clamp-3 {
+        -webkit-line-clamp: 3;
+      }
+      .soft-ring {
+        box-shadow: 0 0 0 1px rgba(255, 77, 125, 0.18) inset;
+      }
+    </style>
+  </head>
+  <body class="min-h-dvh bg-gradient-to-b from-rose-50 via-white to-white text-[color:var(--tw-color-ink,theme(colors.ink))]">
+    <div class="mx-auto max-w-md px-4 pb-10 pt-4">
+      <!-- 顶部：返回 + 标题 -->
+      <header class="flex items-center gap-3">
+        <a
+          href="./index.html"
+          class="grid h-10 w-10 place-items-center rounded-full bg-white/90 shadow-sm ring-1 ring-rose-100/80 backdrop-blur active:scale-[0.98]"
+          aria-label="返回首页"
+        >
+          <span class="text-lg leading-none">‹</span>
+        </a>
+        <div class="min-w-0">
+          <h1 class="truncate text-[18px] font-extrabold tracking-tight">番茄鸡蛋面</h1>
+        </div>
+      </header>
+
+      <!-- 食物信息：左图右文（左侧圆形图） -->
+      <section class="mt-4 overflow-hidden rounded-[28px] bg-white/90 shadow-card ring-1 ring-rose-100/70">
+        <div class="p-4">
+          <div class="flex gap-3">
+            <div class="shrink-0">
+              <img
+                class="h-24 w-24 rounded-full object-cover ring-1 ring-rose-100/70"
+                src="https://placehold.co/200x200/png?text=%E8%8F%9C%E8%B0%B1"
+                alt="番茄鸡蛋面 图片"
+                loading="lazy"
+              />
+            </div>
+            <div class="min-w-0 flex-1 self-center">
+              <div class="flex items-center gap-2">
+                <span class="rounded-full bg-brand-50 px-2 py-0.5 text-xs font-semibold text-brand-600 soft-ring">家常</span>
+                <span class="rounded-full bg-slate-50 px-2 py-0.5 text-xs font-semibold text-slate-700 ring-1 ring-slate-200/80">15 分钟</span>
+              </div>
+              <h2 class="mt-2 truncate text-base font-extrabold">番茄鸡蛋面</h2>
+              <p class="mt-1 clamp-2 text-sm text-slate-600">酸甜番茄配嫩滑鸡蛋，一碗热面快速回血，适合忙碌工作日。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 营养素：方形排版，上图标下信息 -->
+      <section class="mt-4">
+        <div class="mb-3 flex items-end justify-between">
+          <div>
+            <h2 class="text-base font-extrabold tracking-tight">营养素</h2>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-4 gap-2">
+          <article class="rounded-3xl bg-white p-2 text-center shadow-sm ring-1 ring-rose-100/70">
+            <div class="mx-auto grid h-9 w-9 place-items-center rounded-2xl bg-brand-50 text-brand-600 soft-ring">🔥</div>
+            <p class="mt-1 text-[10px] text-slate-500">热量</p>
+            <p class="mt-0.5 text-[12px] font-extrabold text-slate-800">520kcal</p>
+          </article>
+          <article class="rounded-3xl bg-white p-2 text-center shadow-sm ring-1 ring-rose-100/70">
+            <div class="mx-auto grid h-9 w-9 place-items-center rounded-2xl bg-slate-50 text-slate-700 ring-1 ring-slate-200/70">🍗</div>
+            <p class="mt-1 text-[10px] text-slate-500">蛋白质</p>
+            <p class="mt-0.5 text-[12px] font-extrabold text-slate-800">28g</p>
+          </article>
+          <article class="rounded-3xl bg-white p-2 text-center shadow-sm ring-1 ring-rose-100/70">
+            <div class="mx-auto grid h-9 w-9 place-items-center rounded-2xl bg-slate-50 text-slate-700 ring-1 ring-slate-200/70">🍚</div>
+            <p class="mt-1 text-[10px] text-slate-500">碳水</p>
+            <p class="mt-0.5 text-[12px] font-extrabold text-slate-800">62g</p>
+          </article>
+          <article class="rounded-3xl bg-white p-2 text-center shadow-sm ring-1 ring-rose-100/70">
+            <div class="mx-auto grid h-9 w-9 place-items-center rounded-2xl bg-slate-50 text-slate-700 ring-1 ring-slate-200/70">🥑</div>
+            <p class="mt-1 text-[10px] text-slate-500">脂肪</p>
+            <p class="mt-0.5 text-[12px] font-extrabold text-slate-800">16g</p>
+          </article>
+        </div>
+      </section>
+
+      <!-- 菜谱食物列表：左图右文（右侧 食物名 + 营养素信息） -->
+      <section class="mt-6">
+        <div class="mb-3">
+          <h2 class="text-base font-extrabold tracking-tight">食材清单</h2>
+        </div>
+
+        <div class="space-y-3">
+          <article class="flex gap-3 rounded-[28px] bg-white p-4 shadow-sm ring-1 ring-rose-100/70">
+            <img
+              class="h-16 w-16 rounded-2xl object-cover ring-1 ring-rose-100/70"
+              src="https://placehold.co/200x200/png?text=%E9%A3%9F%E6%9D%90"
+              alt="番茄 食材图片"
+              loading="lazy"
+            />
+            <div class="min-w-0 flex-1">
+              <div class="flex items-start justify-between gap-2">
+                <h3 class="truncate text-sm font-extrabold">番茄</h3>
+                <span class="shrink-0 rounded-full bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200/70">1 个</span>
+              </div>
+              <p class="mt-1 text-xs text-slate-600">热量 22kcal · 碳水 5g</p>
+            </div>
+          </article>
+
+          <article class="flex gap-3 rounded-[28px] bg-white p-4 shadow-sm ring-1 ring-rose-100/70">
+            <img
+              class="h-16 w-16 rounded-2xl object-cover ring-1 ring-rose-100/70"
+              src="https://placehold.co/200x200/png?text=%E9%A3%9F%E6%9D%90"
+              alt="鸡蛋 食材图片"
+              loading="lazy"
+            />
+            <div class="min-w-0 flex-1">
+              <div class="flex items-start justify-between gap-2">
+                <h3 class="truncate text-sm font-extrabold">鸡蛋</h3>
+                <span class="shrink-0 rounded-full bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200/70">2 个</span>
+              </div>
+              <p class="mt-1 text-xs text-slate-600">蛋白质 12g · 脂肪 10g</p>
+            </div>
+          </article>
+
+          <article class="flex gap-3 rounded-[28px] bg-white p-4 shadow-sm ring-1 ring-rose-100/70">
+            <img
+              class="h-16 w-16 rounded-2xl object-cover ring-1 ring-rose-100/70"
+              src="https://placehold.co/200x200/png?text=%E9%A3%9F%E6%9D%90"
+              alt="面条 食材图片"
+              loading="lazy"
+            />
+            <div class="min-w-0 flex-1">
+              <div class="flex items-start justify-between gap-2">
+                <h3 class="truncate text-sm font-extrabold">面条</h3>
+                <span class="shrink-0 rounded-full bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200/70">80g</span>
+              </div>
+              <p class="mt-1 text-xs text-slate-600">热量 280kcal · 碳水 56g</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- 制作步骤：左图右文 -->
+      <section class="mt-6">
+        <div class="mb-3">
+          <h2 class="text-base font-extrabold tracking-tight">制作步骤</h2>
+        </div>
+
+        <div class="space-y-3">
+          <article class="flex gap-3 rounded-[28px] bg-white p-4 shadow-sm ring-1 ring-rose-100/70">
+            <div class="grid h-16 w-16 place-items-center rounded-2xl bg-brand-50 text-brand-600 soft-ring">1</div>
+            <div class="min-w-0 flex-1">
+              <h3 class="text-sm font-extrabold">处理食材</h3>
+              <p class="mt-1 clamp-2 text-xs text-slate-600">番茄切小块，鸡蛋打散；锅中烧水备用。</p>
+            </div>
+          </article>
+
+          <article class="flex gap-3 rounded-[28px] bg-white p-4 shadow-sm ring-1 ring-rose-100/70">
+            <div class="grid h-16 w-16 place-items-center rounded-2xl bg-slate-50 text-slate-700 ring-1 ring-slate-200/70">2</div>
+            <div class="min-w-0 flex-1">
+              <h3 class="text-sm font-extrabold">炒番茄与鸡蛋</h3>
+              <p class="mt-1 clamp-2 text-xs text-slate-600">少油热锅，下番茄炒出汁，倒入鸡蛋滑散。</p>
+            </div>
+          </article>
+
+          <article class="flex gap-3 rounded-[28px] bg-white p-4 shadow-sm ring-1 ring-rose-100/70">
+            <div class="grid h-16 w-16 place-items-center rounded-2xl bg-slate-50 text-slate-700 ring-1 ring-slate-200/70">3</div>
+            <div class="min-w-0 flex-1">
+              <h3 class="text-sm font-extrabold">煮面出锅</h3>
+              <p class="mt-1 clamp-2 text-xs text-slate-600">加入开水调味，下面条煮熟，撒葱花即可。</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <footer class="mt-8 text-center text-xs text-slate-400">
+        <p>所有图片与数据均为占位，可替换为真实内容</p>
+      </footer>
+    </div>
+  </body>
+</html>
+

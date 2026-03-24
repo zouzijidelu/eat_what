@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>食物列表 - 吃啥</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                50: "#fff1f5",
+                100: "#ffe4ec",
+                500: "#ff4d7d",
+                600: "#ff2f6d",
+              },
+              ink: "#1f2430",
+            },
+            boxShadow: {
+              card: "0 10px 30px -18px rgba(31,36,48,.25)",
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .clamp-2 {
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        overflow: hidden;
+      }
+      .soft-ring {
+        box-shadow: 0 0 0 1px rgba(255, 77, 125, 0.18) inset;
+      }
+    </style>
+  </head>
+
+  <body class="min-h-dvh bg-gradient-to-b from-rose-50 via-white to-white text-[color:var(--tw-color-ink,theme(colors.ink))]">
+    <div class="mx-auto max-w-md px-4 pb-10 pt-4">
+      <!-- 顶部：返回 + 标题 -->
+      <header class="flex items-center gap-3">
+        <a
+          href="./food-list.html"
+          class="grid h-10 w-10 place-items-center rounded-full bg-white/90 shadow-sm ring-1 ring-rose-100/80 backdrop-blur active:scale-[0.98]"
+          aria-label="返回分类页"
+        >
+          <span class="text-lg leading-none">‹</span>
+        </a>
+        <div class="min-w-0 flex-1">
+          <p class="text-xs font-semibold text-slate-500">食物列表</p>
+          <h1 id="pageTitle" class="truncate text-[18px] font-extrabold tracking-tight">—</h1>
+        </div>
+        <a
+          href="./index.html"
+          class="rounded-full bg-white/80 px-2.5 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200/70 backdrop-blur"
+          aria-label="回首页"
+          >首页</a
+        >
+      </header>
+
+      <!-- 搜索 -->
+      <section class="mt-4">
+        <div class="flex items-center gap-2 rounded-2xl bg-white/90 p-2 ring-1 ring-slate-200/70">
+          <div class="grid h-9 w-9 place-items-center rounded-xl bg-brand-50 text-brand-600 soft-ring">⌕</div>
+          <input
+            id="searchInput"
+            class="h-9 w-full bg-transparent pr-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none"
+            placeholder="搜索本分类食物"
+            aria-label="搜索食物"
+          />
+        </div>
+      </section>
+
+      <!-- 列表 -->
+      <section class="mt-4 overflow-hidden rounded-[28px] bg-white/90 shadow-card ring-1 ring-rose-100/70">
+        <div class="p-3">
+          <div id="metaRow" class="mb-2 flex items-center justify-between">
+            <p id="resultMeta" class="text-[11px] font-semibold text-slate-500">—</p>
+            <a
+              href="./food-detail.html"
+              class="rounded-full bg-brand-50 px-2 py-1 text-[11px] font-semibold text-brand-600 soft-ring"
+              aria-label="打开食物详情示例"
+              >示例详情 →</a
+            >
+          </div>
+
+          <div id="itemsList" class="space-y-2">
+            <!-- items injected -->
+          </div>
+
+          <div id="emptyState" class="hidden rounded-3xl bg-rose-50/40 p-6 text-center ring-1 ring-rose-100/70">
+            <p class="text-sm font-extrabold">没有找到相关食物</p>
+            <p class="mt-1 text-xs text-slate-500">换个关键词试试</p>
+          </div>
+        </div>
+      </section>
+
+      <footer class="mt-6 text-center text-xs text-slate-400">
+        <p>列表为占位数据；可替换为真实食物库</p>
+      </footer>
+    </div>
+
+    <script>
+      (function () {
+        const params = new URLSearchParams(location.search);
+        const category = params.get("c") || "分类";
+
+        const titleEl = document.getElementById("pageTitle");
+        const listEl = document.getElementById("itemsList");
+        const metaEl = document.getElementById("resultMeta");
+        const emptyEl = document.getElementById("emptyState");
+        const searchEl = document.getElementById("searchInput");
+
+        if (titleEl) titleEl.textContent = category;
+
+        const db = {
+          "莓果类": [
+            { name: "蓝莓", tag: "清爽", kcal: "57kcal/100g" },
+            { name: "草莓", tag: "维C", kcal: "32kcal/100g" },
+            { name: "覆盆子", tag: "酸甜", kcal: "52kcal/100g" },
+            { name: "黑莓", tag: "高纤", kcal: "43kcal/100g" },
+          ],
+          "热带水果": [
+            { name: "牛油果", tag: "脂肪", kcal: "160kcal/100g" },
+            { name: "芒果", tag: "香甜", kcal: "60kcal/100g" },
+            { name: "菠萝", tag: "清爽", kcal: "50kcal/100g" },
+            { name: "香蕉", tag: "能量", kcal: "89kcal/100g" },
+          ],
+          "柑橘类": [
+            { name: "橙子", tag: "维C", kcal: "47kcal/100g" },
+            { name: "柠檬", tag: "酸", kcal: "29kcal/100g" },
+            { name: "柚子", tag: "清新", kcal: "38kcal/100g" },
+          ],
+          "应季精选": [
+            { name: "苹果", tag: "常青", kcal: "52kcal/100g" },
+            { name: "梨", tag: "清甜", kcal: "57kcal/100g" },
+            { name: "葡萄", tag: "甜", kcal: "69kcal/100g" },
+          ],
+          "鱼虾贝": [
+            { name: "三文鱼", tag: "优质脂肪", kcal: "208kcal/100g" },
+            { name: "虾", tag: "高蛋白", kcal: "99kcal/100g" },
+            { name: "扇贝", tag: "鲜", kcal: "90kcal/100g" },
+          ],
+          "禽肉": [
+            { name: "鸡胸肉", tag: "高蛋白", kcal: "165kcal/100g" },
+            { name: "鸭胸肉", tag: "饱腹", kcal: "201kcal/100g" },
+          ],
+          "蛋奶": [
+            { name: "鸡蛋", tag: "百搭", kcal: "143kcal/100g" },
+            { name: "酸奶", tag: "顺口", kcal: "59kcal/100g" },
+            { name: "奶酪", tag: "浓郁", kcal: "402kcal/100g" },
+          ],
+          "豆制品": [
+            { name: "北豆腐", tag: "嫩", kcal: "76kcal/100g" },
+            { name: "毛豆", tag: "高纤", kcal: "122kcal/100g" },
+            { name: "豆浆", tag: "顺滑", kcal: "33kcal/100g" },
+          ],
+          "米面": [
+            { name: "面条", tag: "快手", kcal: "138kcal/100g" },
+            { name: "米饭", tag: "家常", kcal: "130kcal/100g" },
+            { name: "米粉", tag: "软糯", kcal: "109kcal/100g" },
+          ],
+          "全谷物": [
+            { name: "燕麦", tag: "耐饿", kcal: "389kcal/100g" },
+            { name: "糙米", tag: "饱腹", kcal: "370kcal/100g" },
+            { name: "藜麦", tag: "轻食", kcal: "368kcal/100g" },
+          ],
+          "薯类": [
+            { name: "土豆", tag: "百搭", kcal: "77kcal/100g" },
+            { name: "红薯", tag: "甜", kcal: "86kcal/100g" },
+          ],
+          "面包": [
+            { name: "吐司", tag: "快手", kcal: "265kcal/100g" },
+            { name: "全麦面包", tag: "饱腹", kcal: "247kcal/100g" },
+          ],
+          "叶菜": [
+            { name: "生菜", tag: "清爽", kcal: "15kcal/100g" },
+            { name: "菠菜", tag: "铁", kcal: "23kcal/100g" },
+          ],
+          "瓜茄": [
+            { name: "番茄", tag: "酸甜", kcal: "18kcal/100g" },
+            { name: "黄瓜", tag: "清爽", kcal: "15kcal/100g" },
+            { name: "茄子", tag: "绵", kcal: "25kcal/100g" },
+          ],
+          "菌菇": [
+            { name: "香菇", tag: "鲜", kcal: "34kcal/100g" },
+            { name: "金针菇", tag: "脆", kcal: "37kcal/100g" },
+          ],
+          "根茎": [
+            { name: "胡萝卜", tag: "胡萝卜素", kcal: "41kcal/100g" },
+            { name: "白萝卜", tag: "清甜", kcal: "18kcal/100g" },
+          ],
+          "坚果": [
+            { name: "杏仁", tag: "香", kcal: "579kcal/100g" },
+            { name: "核桃", tag: "脆", kcal: "654kcal/100g" },
+            { name: "腰果", tag: "甜香", kcal: "553kcal/100g" },
+          ],
+          "酸奶杯": [
+            { name: "原味酸奶", tag: "顺口", kcal: "59kcal/100g" },
+            { name: "格兰诺拉", tag: "脆", kcal: "471kcal/100g" },
+            { name: "香蕉片", tag: "甜", kcal: "89kcal/100g" },
+          ],
+          "低糖甜点": [
+            { name: "奇亚籽布丁", tag: "饱腹", kcal: "—" },
+            { name: "无糖果冻", tag: "轻", kcal: "—" },
+          ],
+          "小食": [
+            { name: "海苔", tag: "咸香", kcal: "—" },
+            { name: "玉米片", tag: "脆", kcal: "—" },
+          ],
+        };
+
+        const all = db[category] || [
+          { name: "示例食物 A", tag: "占位", kcal: "—" },
+          { name: "示例食物 B", tag: "占位", kcal: "—" },
+          { name: "示例食物 C", tag: "占位", kcal: "—" },
+        ];
+
+        const imgFor = (name) => `https://placehold.co/200x200/png?text=${encodeURIComponent(name)}`;
+
+        const render = (items) => {
+          if (!listEl || !metaEl || !emptyEl) return;
+          metaEl.textContent = `共 ${items.length} 个食物`;
+          emptyEl.classList.toggle("hidden", items.length !== 0);
+          listEl.classList.toggle("hidden", items.length === 0);
+          listEl.innerHTML = items
+            .map(
+              (i) => `
+              <a href="./food-detail.html" class="flex gap-3 rounded-[24px] bg-white p-3 shadow-sm ring-1 ring-rose-100/70 active:scale-[0.995]" aria-label="查看${i.name}详情">
+                <img class="h-14 w-14 rounded-2xl object-cover ring-1 ring-rose-100/70" src="${imgFor(i.name)}" alt="${i.name} 图片" loading="lazy" />
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-start justify-between gap-2">
+                    <h3 class="truncate text-sm font-extrabold">${i.name}</h3>
+                    <span class="shrink-0 rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-semibold text-brand-600 soft-ring">${i.tag}</span>
+                  </div>
+                  <p class="mt-1 clamp-2 text-xs text-slate-600">${i.kcal}</p>
+                </div>
+              </a>
+            `
+            )
+            .join("");
+        };
+
+        render(all);
+
+        const filter = () => {
+          const q = (searchEl?.value || "").trim().toLowerCase();
+          if (!q) return render(all);
+          const filtered = all.filter((x) => (x.name || "").toLowerCase().includes(q));
+          render(filtered);
+        };
+
+        searchEl?.addEventListener("input", filter);
+      })();
+    </script>
+  </body>
+</html>
+

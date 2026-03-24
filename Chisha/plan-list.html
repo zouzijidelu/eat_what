@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>饮食计划 - 吃啥</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                50: "#fff1f5",
+                100: "#ffe4ec",
+                500: "#ff4d7d",
+                600: "#ff2f6d",
+              },
+              ink: "#1f2430",
+            },
+            boxShadow: {
+              card: "0 10px 30px -18px rgba(31,36,48,.25)",
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .clamp-2 {
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        overflow: hidden;
+      }
+      .soft-ring {
+        box-shadow: 0 0 0 1px rgba(255, 77, 125, 0.18) inset;
+      }
+    </style>
+  </head>
+
+  <body class="min-h-dvh bg-gradient-to-b from-rose-50 via-white to-white text-[color:var(--tw-color-ink,theme(colors.ink))]">
+    <div class="mx-auto max-w-md px-4 pb-10 pt-4">
+      <!-- 顶部：返回 + 标题 -->
+      <header class="flex items-center gap-3">
+        <a
+          href="./index.html"
+          class="grid h-10 w-10 place-items-center rounded-full bg-white/90 shadow-sm ring-1 ring-rose-100/80 backdrop-blur active:scale-[0.98]"
+          aria-label="返回首页"
+        >
+          <span class="text-lg leading-none">‹</span>
+        </a>
+        <div class="min-w-0 flex-1">
+          <p class="text-xs font-semibold text-slate-500">更多</p>
+          <h1 class="truncate text-[18px] font-extrabold tracking-tight">饮食计划</h1>
+        </div>
+        <a
+          href="./index.html"
+          class="rounded-full bg-white/80 px-2.5 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200/70 backdrop-blur"
+          aria-label="回首页"
+          >首页</a
+        >
+      </header>
+
+      <!-- 计划列表 -->
+      <section class="mt-4 overflow-hidden rounded-[28px] bg-white/90 shadow-card ring-1 ring-rose-100/70">
+        <div class="p-3">
+          <div class="mb-3 flex items-end justify-between">
+            <div>
+              <h2 class="text-base font-extrabold tracking-tight">为你精选</h2>
+              <p class="mt-1 text-xs text-slate-500">点卡片进入计划详情</p>
+            </div>
+            <span class="rounded-full bg-brand-50 px-2 py-1 text-[11px] font-semibold text-brand-600 soft-ring">静态示例</span>
+          </div>
+
+          <div class="space-y-3">
+            <a
+              href="./plan-detail.html?p=%E8%BD%BB%E7%9B%88%E6%8E%A7%E5%8D%A1"
+              class="flex gap-3 rounded-[28px] bg-white p-4 shadow-sm ring-1 ring-rose-100/70 active:scale-[0.995]"
+              aria-label="查看轻盈控卡计划详情"
+            >
+              <img
+                class="h-20 w-20 rounded-2xl object-cover ring-1 ring-rose-100/70"
+                src="https://placehold.co/200x200/png?text=%E8%AE%A1%E5%88%92"
+                alt="轻盈控卡 计划图片"
+                loading="lazy"
+              />
+              <div class="min-w-0 flex-1">
+                <div class="flex items-start justify-between gap-2">
+                  <div class="min-w-0">
+                    <h3 class="truncate text-sm font-extrabold">轻盈控卡</h3>
+                    <p class="mt-1 clamp-2 text-xs text-slate-600">减少油炸和高糖，三餐结构更稳，适合想要轻断负担的一周。</p>
+                  </div>
+                  <span class="shrink-0 rounded-full bg-brand-50 px-2 py-0.5 text-xs font-semibold text-brand-600 soft-ring">7 天</span>
+                </div>
+              </div>
+            </a>
+
+            <a
+              href="./plan-detail.html?p=%E5%85%83%E6%B0%94%E5%A2%9E%E8%82%8C"
+              class="flex gap-3 rounded-[28px] bg-white p-4 shadow-sm ring-1 ring-rose-100/70 active:scale-[0.995]"
+              aria-label="查看元气增肌计划详情"
+            >
+              <img
+                class="h-20 w-20 rounded-2xl object-cover ring-1 ring-rose-100/70"
+                src="https://placehold.co/200x200/png?text=%E8%AE%A1%E5%88%92"
+                alt="元气增肌 计划图片"
+                loading="lazy"
+              />
+              <div class="min-w-0 flex-1">
+                <div class="flex items-start justify-between gap-2">
+                  <div class="min-w-0">
+                    <h3 class="truncate text-sm font-extrabold">元气增肌</h3>
+                    <p class="mt-1 clamp-2 text-xs text-slate-600">训练日更有力，三餐更有“能量感”，适合力量训练周期。</p>
+                  </div>
+                  <span class="shrink-0 rounded-full bg-rose-50 px-2 py-0.5 text-xs font-semibold text-rose-700 ring-1 ring-rose-100/80"
+                    >14 天</span
+                  >
+                </div>
+              </div>
+            </a>
+
+            <a
+              href="./plan-detail.html?p=%E6%B8%85%E6%B7%A1%E5%85%BB%E8%83%83"
+              class="flex gap-3 rounded-[28px] bg-white p-4 shadow-sm ring-1 ring-rose-100/70 active:scale-[0.995]"
+              aria-label="查看清淡养胃计划详情"
+            >
+              <img
+                class="h-20 w-20 rounded-2xl object-cover ring-1 ring-rose-100/70"
+                src="https://placehold.co/200x200/png?text=%E8%AE%A1%E5%88%92"
+                alt="清淡养胃 计划图片"
+                loading="lazy"
+              />
+              <div class="min-w-0 flex-1">
+                <div class="flex items-start justify-between gap-2">
+                  <div class="min-w-0">
+                    <h3 class="truncate text-sm font-extrabold">清淡养胃</h3>
+                    <p class="mt-1 clamp-2 text-xs text-slate-600">少刺激、少油盐，软烂易消化，适合想把饮食“调顺”的阶段。</p>
+                  </div>
+                  <span class="shrink-0 rounded-full bg-slate-50 px-2 py-0.5 text-xs font-semibold text-slate-700 ring-1 ring-slate-200/80"
+                    >5 天</span
+                  >
+                </div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <footer class="mt-6 text-center text-xs text-slate-400">
+        <p>可继续扩展：筛选、搜索、更多计划</p>
+      </footer>
+    </div>
+  </body>
+</html>
+

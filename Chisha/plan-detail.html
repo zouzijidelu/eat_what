@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>饮食计划详情 - 吃啥</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                50: "#fff1f5",
+                100: "#ffe4ec",
+                500: "#ff4d7d",
+                600: "#ff2f6d",
+              },
+              ink: "#1f2430",
+            },
+            boxShadow: {
+              card: "0 10px 30px -18px rgba(31,36,48,.25)",
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .clamp-2 {
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        overflow: hidden;
+      }
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+      .soft-ring {
+        box-shadow: 0 0 0 1px rgba(255, 77, 125, 0.18) inset;
+      }
+    </style>
+  </head>
+
+  <body class="min-h-dvh bg-gradient-to-b from-rose-50 via-white to-white text-[color:var(--tw-color-ink,theme(colors.ink))]">
+    <div class="mx-auto max-w-md px-4 pb-10 pt-4">
+      <!-- 顶部：返回 + 标题 -->
+      <header class="flex items-center gap-3">
+        <a
+          href="./plan-list.html"
+          class="grid h-10 w-10 place-items-center rounded-full bg-white/90 shadow-sm ring-1 ring-rose-100/80 backdrop-blur active:scale-[0.98]"
+          aria-label="返回计划列表"
+        >
+          <span class="text-lg leading-none">‹</span>
+        </a>
+        <div class="min-w-0 flex-1">
+          <p class="text-xs font-semibold text-slate-500">计划详情</p>
+          <h1 id="planHeaderTitle" class="truncate text-[18px] font-extrabold tracking-tight">—</h1>
+        </div>
+        <a
+          href="./index.html"
+          class="rounded-full bg-white/80 px-2.5 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200/70 backdrop-blur"
+          aria-label="回首页"
+          >首页</a
+        >
+      </header>
+
+      <!-- 计划信息：左图右文 -->
+      <section class="mt-4 overflow-hidden rounded-[28px] bg-white/90 shadow-card ring-1 ring-rose-100/70">
+        <div class="p-4">
+          <div class="flex gap-3">
+            <img
+              class="h-20 w-20 rounded-2xl object-cover ring-1 ring-rose-100/70"
+              src="https://placehold.co/200x200/png?text=%E8%AE%A1%E5%88%92"
+              alt="饮食计划 图片"
+              loading="lazy"
+            />
+            <div class="min-w-0 flex-1">
+              <div class="flex items-start justify-between gap-2">
+                <div class="min-w-0">
+                  <h2 id="planTitle" class="truncate text-base font-extrabold">—</h2>
+                  <p id="planDesc" class="mt-1 clamp-2 text-sm text-slate-600">—</p>
+                </div>
+                <span id="planDays" class="shrink-0 rounded-full bg-brand-50 px-2 py-0.5 text-xs font-semibold text-brand-600 soft-ring">—</span>
+              </div>
+
+              <div id="planTags" class="mt-3 flex flex-wrap gap-2">
+                <span class="rounded-full bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200/80">—</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 今日安排（示例）：早餐/午餐/晚餐 -->
+      <section class="mt-6">
+        <div class="mb-3 flex items-end justify-between">
+          <div>
+            <h2 class="text-base font-extrabold tracking-tight">今日安排</h2>
+            <p id="dayHint" class="mt-1 text-xs text-slate-500">示例：第 1 天</p>
+          </div>
+          <span class="rounded-full bg-white/80 px-2 py-1 text-[11px] font-semibold text-slate-600 ring-1 ring-slate-200/70">可替换为真实数据</span>
+        </div>
+
+        <!-- 选择天数 -->
+        <div class="no-scrollbar -mt-0.5 mb-3 flex gap-2 overflow-x-auto pb-1">
+          <div id="dayPicker" class="flex gap-2">
+            <!-- day buttons injected -->
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          <article class="rounded-[28px] bg-white p-4 shadow-sm ring-1 ring-rose-100/70">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="grid h-8 w-8 place-items-center rounded-2xl bg-brand-50 text-brand-600 soft-ring">早</span>
+                <h3 class="text-sm font-extrabold">早餐</h3>
+              </div>
+              <span class="rounded-full bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200/80">清爽开局</span>
+            </div>
+
+            <div class="mt-3 space-y-2">
+              <a
+                href="./recipe-detail.html"
+                class="flex gap-3 rounded-[22px] bg-rose-50/30 p-3 ring-1 ring-rose-100/70 active:scale-[0.995]"
+                aria-label="查看早餐菜谱"
+              >
+                <img
+                  class="h-12 w-12 rounded-2xl object-cover ring-1 ring-rose-100/70"
+                  src="https://placehold.co/200x200/png?text=%E9%A3%9F%E8%B0%B1"
+                  alt="早餐菜谱 图片"
+                  loading="lazy"
+                />
+                <div class="min-w-0 flex-1">
+                  <p id="breakfastTitle" class="truncate text-sm font-extrabold">酸奶水果杯</p>
+                  <p id="breakfastDesc" class="mt-0.5 truncate text-xs text-slate-600">酸奶 + 莓果 + 燕麦</p>
+                </div>
+              </a>
+            </div>
+          </article>
+
+          <article class="rounded-[28px] bg-white p-4 shadow-sm ring-1 ring-rose-100/70">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="grid h-8 w-8 place-items-center rounded-2xl bg-slate-50 text-slate-700 ring-1 ring-slate-200/70">午</span>
+                <h3 class="text-sm font-extrabold">午餐</h3>
+              </div>
+              <span class="rounded-full bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200/80">稳稳饱腹</span>
+            </div>
+
+            <div class="mt-3 space-y-2">
+              <a
+                href="./recipe-detail.html"
+                class="flex gap-3 rounded-[22px] bg-rose-50/30 p-3 ring-1 ring-rose-100/70 active:scale-[0.995]"
+                aria-label="查看午餐菜谱"
+              >
+                <img
+                  class="h-12 w-12 rounded-2xl object-cover ring-1 ring-rose-100/70"
+                  src="https://placehold.co/200x200/png?text=%E9%A3%9F%E8%B0%B1"
+                  alt="午餐菜谱 图片"
+                  loading="lazy"
+                />
+                <div class="min-w-0 flex-1">
+                  <p id="lunchTitle" class="truncate text-sm font-extrabold">香煎鸡胸沙拉</p>
+                  <p id="lunchDesc" class="mt-0.5 truncate text-xs text-slate-600">鸡胸 + 生菜 + 番茄</p>
+                </div>
+              </a>
+            </div>
+          </article>
+
+          <article class="rounded-[28px] bg-white p-4 shadow-sm ring-1 ring-rose-100/70">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="grid h-8 w-8 place-items-center rounded-2xl bg-slate-50 text-slate-700 ring-1 ring-slate-200/70">晚</span>
+                <h3 class="text-sm font-extrabold">晚餐</h3>
+              </div>
+              <span class="rounded-full bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200/80">轻一点</span>
+            </div>
+
+            <div class="mt-3 space-y-2">
+              <a
+                href="./recipe-detail.html"
+                class="flex gap-3 rounded-[22px] bg-rose-50/30 p-3 ring-1 ring-rose-100/70 active:scale-[0.995]"
+                aria-label="查看晚餐菜谱"
+              >
+                <img
+                  class="h-12 w-12 rounded-2xl object-cover ring-1 ring-rose-100/70"
+                  src="https://placehold.co/200x200/png?text=%E9%A3%9F%E8%B0%B1"
+                  alt="晚餐菜谱 图片"
+                  loading="lazy"
+                />
+                <div class="min-w-0 flex-1">
+                  <p id="dinnerTitle" class="truncate text-sm font-extrabold">番茄鸡蛋面</p>
+                  <p id="dinnerDesc" class="mt-0.5 truncate text-xs text-slate-600">番茄 + 鸡蛋 + 面条</p>
+                </div>
+              </a>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- 计划说明 -->
+      <section class="mt-6">
+        <div class="mb-3">
+          <h2 class="text-base font-extrabold tracking-tight">计划说明</h2>
+        </div>
+        <div class="rounded-[28px] bg-white p-4 shadow-sm ring-1 ring-rose-100/70">
+          <ul class="space-y-2 text-sm text-slate-700">
+            <li class="flex gap-2">
+              <span class="mt-0.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-brand-600/80"></span>
+              <p class="clamp-2">以清淡烹饪为主，优先蒸/煮/炖，减少油炸和重口味。</p>
+            </li>
+            <li class="flex gap-2">
+              <span class="mt-0.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-brand-600/80"></span>
+              <p class="clamp-2">三餐尽量规律；如果加餐，选择水果或酸奶等轻负担选项。</p>
+            </li>
+            <li class="flex gap-2">
+              <span class="mt-0.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-brand-600/80"></span>
+              <p class="clamp-2">占位内容：后续可扩展为第 1～7 天的完整菜单。</p>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <footer class="mt-6 text-center text-xs text-slate-400">
+        <p>这是静态计划详情页示例，可继续扩展</p>
+      </footer>
+    </div>
+
+    <script>
+      (function () {
+        const params = new URLSearchParams(location.search);
+        const p = params.get("p") || "轻盈控卡";
+
+        const plans = {
+          轻盈控卡: {
+            header: "轻盈控卡（7 天）",
+            title: "轻盈控卡",
+            days: "7 天",
+            daysCount: 7,
+            desc: "减少油炸和高糖，三餐结构更稳，适合想要轻断负担的一周。",
+            tags: ["适用：轻断油糖", "难度：简单", "口味：清淡"],
+            schedule: [
+              { b: ["酸奶水果杯", "酸奶 + 莓果 + 燕麦"], l: ["香煎鸡胸沙拉", "鸡胸 + 生菜 + 番茄"], d: ["番茄鸡蛋面", "番茄 + 鸡蛋 + 面条"] },
+              { b: ["燕麦香蕉杯", "燕麦 + 香蕉 + 坚果"], l: ["清蒸鱼配蔬菜", "鱼类 + 绿叶菜"], d: ["菌菇豆腐汤", "豆腐 + 菌菇 + 青菜"] },
+              { b: ["全麦吐司+鸡蛋", "吐司 + 鸡蛋 + 牛油果"], l: ["番茄牛腩（少油）", "牛腩 + 番茄"], d: ["蔬菜鸡蛋粥", "粥 + 蔬菜 + 鸡蛋"] },
+              { b: ["酸奶坚果碗", "酸奶 + 坚果 + 蓝莓"], l: ["照烧鸡腿（少酱）", "鸡腿 + 时蔬"], d: ["清炒时蔬+主食", "时蔬 + 米饭"] },
+              { b: ["豆浆+全麦", "豆浆 + 全麦面包"], l: ["牛肉蔬菜卷", "牛肉 + 生菜"], d: ["紫菜蛋花汤", "紫菜 + 鸡蛋"] },
+              { b: ["水果拼盘", "时令水果 + 酸奶"], l: ["虾仁炒蛋", "虾仁 + 鸡蛋"], d: ["蒸南瓜+酸奶", "南瓜 + 酸奶"] },
+              { b: ["小米粥", "小米 + 红枣"], l: ["鸡丝凉面", "鸡胸 + 面"], d: ["清炖萝卜汤", "萝卜 + 瘦肉"] },
+            ],
+          },
+          元气增肌: {
+            header: "元气增肌（14 天）",
+            title: "元气增肌",
+            days: "14 天",
+            daysCount: 14,
+            desc: "训练日更有力，三餐更有“能量感”，适合力量训练周期。",
+            tags: ["适用：训练周期", "难度：中等", "口味：丰富"],
+            schedule: [
+              { b: ["鸡蛋吐司", "鸡蛋 + 全麦吐司"], l: ["牛肉饭", "牛肉 + 米饭 + 蔬菜"], d: ["三文鱼沙拉", "三文鱼 + 蔬菜"] },
+              { b: ["酸奶+麦片", "酸奶 + 麦片"], l: ["鸡胸意面", "鸡胸 + 意面"], d: ["豆腐菌菇煲", "豆腐 + 菌菇"] },
+            ],
+          },
+          清淡养胃: {
+            header: "清淡养胃（5 天）",
+            title: "清淡养胃",
+            days: "5 天",
+            daysCount: 5,
+            desc: "少刺激、少油盐，软烂易消化，适合想把饮食“调顺”的阶段。",
+            tags: ["适用：想吃清淡", "难度：简单", "口味：清爽"],
+            schedule: [
+              { b: ["小米粥", "小米 + 温热"], l: ["蒸蛋", "鸡蛋 + 温水"], d: ["蔬菜面", "面条 + 软蔬菜"] },
+              { b: ["南瓜粥", "南瓜 + 小米"], l: ["清炖鸡汤", "鸡肉 + 胡萝卜"], d: ["豆腐汤", "豆腐 + 青菜"] },
+              { b: ["藕粉", "温热冲调"], l: ["清蒸鱼", "鱼 + 少盐"], d: ["米粥配小菜", "清淡小菜"] },
+              { b: ["燕麦粥", "燕麦 + 牛奶"], l: ["番茄蛋花汤", "番茄 + 鸡蛋"], d: ["软烂蔬菜饭", "米饭 + 蔬菜"] },
+              { b: ["玉米粥", "玉米 + 小米"], l: ["冬瓜汤", "冬瓜 + 虾皮"], d: ["面片汤", "面片 + 青菜"] },
+            ],
+          },
+        };
+
+        const model = plans[p] || plans["轻盈控卡"];
+
+        const headerEl = document.getElementById("planHeaderTitle");
+        const titleEl = document.getElementById("planTitle");
+        const descEl = document.getElementById("planDesc");
+        const daysEl = document.getElementById("planDays");
+        const tagsEl = document.getElementById("planTags");
+
+        if (headerEl) headerEl.textContent = model.header;
+        if (titleEl) titleEl.textContent = model.title;
+        if (descEl) descEl.textContent = model.desc;
+        if (daysEl) daysEl.textContent = model.days;
+
+        if (tagsEl) {
+          tagsEl.innerHTML = model.tags
+            .map(
+              (t) =>
+                `<span class="rounded-full bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200/80">${t}</span>`
+            )
+            .join("");
+        }
+
+        // 天数选择
+        const dayHintEl = document.getElementById("dayHint");
+        const dayPickerEl = document.getElementById("dayPicker");
+        const breakfastTitleEl = document.getElementById("breakfastTitle");
+        const breakfastDescEl = document.getElementById("breakfastDesc");
+        const lunchTitleEl = document.getElementById("lunchTitle");
+        const lunchDescEl = document.getElementById("lunchDesc");
+        const dinnerTitleEl = document.getElementById("dinnerTitle");
+        const dinnerDescEl = document.getElementById("dinnerDesc");
+
+        const count = Number(model.daysCount || 7);
+        const schedule = Array.isArray(model.schedule) ? model.schedule : [];
+        let activeDay = 1;
+
+        const dayBtnClass = (active) =>
+          [
+            "shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold transition",
+            active ? "bg-brand-50 text-brand-600 soft-ring" : "bg-white/90 text-slate-700 ring-1 ring-slate-200/70",
+            "active:scale-[0.98]",
+          ].join(" ");
+
+        const pickSchedule = (day) => {
+          if (schedule.length === 0) return null;
+          // 若计划提供的天数不足，则循环使用占位
+          return schedule[(day - 1) % schedule.length];
+        };
+
+        const renderDayPicker = () => {
+          if (!dayPickerEl) return;
+          dayPickerEl.innerHTML = Array.from({ length: count }, (_, i) => {
+            const d = i + 1;
+            return `<button type="button" class="${dayBtnClass(d === activeDay)}" data-day="${d}">第 ${d} 天</button>`;
+          }).join("");
+        };
+
+        const applyDay = (day) => {
+          activeDay = Math.max(1, Math.min(count, day));
+          if (dayHintEl) dayHintEl.textContent = `示例：第 ${activeDay} 天`;
+
+          const s = pickSchedule(activeDay);
+          if (!s) return;
+
+          if (breakfastTitleEl) breakfastTitleEl.textContent = s.b?.[0] || "—";
+          if (breakfastDescEl) breakfastDescEl.textContent = s.b?.[1] || "—";
+          if (lunchTitleEl) lunchTitleEl.textContent = s.l?.[0] || "—";
+          if (lunchDescEl) lunchDescEl.textContent = s.l?.[1] || "—";
+          if (dinnerTitleEl) dinnerTitleEl.textContent = s.d?.[0] || "—";
+          if (dinnerDescEl) dinnerDescEl.textContent = s.d?.[1] || "—";
+
+          renderDayPicker();
+        };
+
+        dayPickerEl?.addEventListener("click", (e) => {
+          const btn = e.target.closest("button[data-day]");
+          if (!btn) return;
+          const day = Number(btn.getAttribute("data-day") || "1");
+          if (!Number.isFinite(day)) return;
+          applyDay(day);
+        });
+
+        applyDay(1);
+      })();
+    </script>
+  </body>
+</html>
+
