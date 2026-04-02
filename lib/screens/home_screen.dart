@@ -58,7 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   _buildHeader(),
                   const SizedBox(height: 24),
                   _buildRecipeSection(),
-                  const SizedBox(height: 28),
+                  const SizedBox(height: 10),
                   _buildFoodSection(),
                   const SizedBox(height: 28),
                   _buildPlanSection(),
@@ -90,7 +90,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: const Center(child: Text('🍽️', style: TextStyle(fontSize: 20))),
+                child: const Center(
+                  child: Text('🍽️', style: TextStyle(fontSize: 20)),
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -99,30 +101,42 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     Row(
                       children: [
-                        Text('吃啥', style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -0.5,
-                        )),
+                        Text(
+                          '吃啥',
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: -0.5,
+                              ),
+                        ),
                         const Spacer(),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: AppColors.brand50,
                             borderRadius: BorderRadius.circular(999),
-                            border: Border.all(color: AppColors.brand500.withValues(alpha: 0.18)),
+                            border: Border.all(
+                              color: AppColors.brand500.withValues(alpha: 0.18),
+                            ),
                           ),
-                          child: Text('今日推荐', style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.brand600,
-                          )),
+                          child: Text(
+                            '今日推荐',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.brand600,
+                            ),
+                          ),
                         ),
                       ],
                     ),
-                    Text('生活有态度，生活有温度', style: TextStyle(
-                      fontSize: 14,
-                      color: AppColors.slate600,
-                    )),
+                    Text(
+                      '生活有态度，生活有温度',
+                      style: TextStyle(fontSize: 14, color: AppColors.slate600),
+                    ),
                   ],
                 ),
               ),
@@ -134,7 +148,9 @@ class _HomeScreenState extends State<HomeScreen> {
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.9),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.slate200.withValues(alpha: 0.7)),
+              border: Border.all(
+                color: AppColors.slate200.withValues(alpha: 0.7),
+              ),
             ),
             child: Row(
               children: [
@@ -144,16 +160,20 @@ class _HomeScreenState extends State<HomeScreen> {
                   decoration: BoxDecoration(
                     color: AppColors.brand50,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.brand500.withValues(alpha: 0.18)),
+                    border: Border.all(
+                      color: AppColors.brand500.withValues(alpha: 0.18),
+                    ),
                   ),
-                  child: const Center(child: Text('⌕', style: TextStyle(fontSize: 16))),
+                  child: const Center(
+                    child: Text('⌕', style: TextStyle(fontSize: 16)),
+                  ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: Text('搜索食谱 / 食物 / 计划', style: TextStyle(
-                    fontSize: 14,
-                    color: AppColors.slate500,
-                  )),
+                  child: Text(
+                    '搜索食谱 / 食物 / 计划',
+                    style: TextStyle(fontSize: 14, color: AppColors.slate500),
+                  ),
                 ),
               ],
             ),
@@ -167,40 +187,52 @@ class _HomeScreenState extends State<HomeScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('食谱推荐', style: Theme.of(context).textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.w800,
-          letterSpacing: -0.5,
-        )),
-        const SizedBox(height: 12),
-        SizedBox(
-          height: 140,
-          child: PageView.builder(
-            controller: _recipeController,
-            itemCount: MockData.recipes.length,
-            onPageChanged: (i) => setState(() => _recipeIndex = i),
-            itemBuilder: (context, i) {
-              final r = MockData.recipes[i];
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: _RecipeCard(recipe: r),
-              );
-            },
+        Text(
+          '食谱推荐',
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.5,
           ),
         ),
-        const SizedBox(height: 8),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(MockData.recipes.length, (i) {
-            return Container(
-              margin: const EdgeInsets.symmetric(horizontal: 4),
-              width: 8,
-              height: 8,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: i == _recipeIndex ? AppColors.brand600.withValues(alpha: 0.9) : AppColors.slate200,
+        const SizedBox(height: 12),
+        Stack(
+          alignment: Alignment.bottomCenter,
+          children: [
+            SizedBox(
+              height: 220,
+              child: PageView.builder(
+                controller: _recipeController,
+                itemCount: MockData.recipes.length,
+                onPageChanged: (i) => setState(() => _recipeIndex = i),
+                itemBuilder: (context, i) {
+                  final r = MockData.recipes[i];
+                  return Padding(
+                    padding: const EdgeInsets.fromLTRB(4, 0, 4, 28),
+                    child: _RecipeCard(recipe: r),
+                  );
+                },
               ),
-            );
-          }),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(MockData.recipes.length, (i) {
+                  return Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: i == _recipeIndex
+                          ? AppColors.brand600.withValues(alpha: 0.9)
+                          : AppColors.slate200,
+                    ),
+                  );
+                }),
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -213,24 +245,38 @@ class _HomeScreenState extends State<HomeScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('食物推荐', style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.5,
-            )),
+            Text(
+              '食物推荐',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.5,
+              ),
+            ),
             GestureDetector(
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const FoodListScreen())),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const FoodListScreen()),
+              ),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.8),
                   borderRadius: BorderRadius.circular(999),
-                  border: Border.all(color: AppColors.rose100.withValues(alpha: 0.8)),
+                  border: Border.all(
+                    color: AppColors.rose100.withValues(alpha: 0.8),
+                  ),
                 ),
-                child: Text('更多 →', style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.brand600,
-                )),
+                child: Text(
+                  '更多 →',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.brand600,
+                  ),
+                ),
               ),
             ),
           ],
@@ -242,8 +288,10 @@ class _HomeScreenState extends State<HomeScreen> {
           crossAxisCount: 4,
           mainAxisSpacing: 8,
           crossAxisSpacing: 8,
-          childAspectRatio: 0.75,
-          children: MockData.homeFoods.map((f) => _FoodGridItem(food: f)).toList(),
+          childAspectRatio: 0.7,
+          children: MockData.homeFoods
+              .map((f) => _FoodGridItem(food: f))
+              .toList(),
         ),
       ],
     );
@@ -256,33 +304,49 @@ class _HomeScreenState extends State<HomeScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('饮食计划', style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.5,
-            )),
+            Text(
+              '饮食计划',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.5,
+              ),
+            ),
             GestureDetector(
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PlanListScreen())),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const PlanListScreen()),
+              ),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.8),
                   borderRadius: BorderRadius.circular(999),
-                  border: Border.all(color: AppColors.rose100.withValues(alpha: 0.8)),
+                  border: Border.all(
+                    color: AppColors.rose100.withValues(alpha: 0.8),
+                  ),
                 ),
-                child: Text('更多 →', style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.brand600,
-                )),
+                child: Text(
+                  '更多 →',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.brand600,
+                  ),
+                ),
               ),
             ),
           ],
         ),
         const SizedBox(height: 12),
-        ...MockData.plans.map((p) => Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: _PlanCard(plan: p),
-        )),
+        ...MockData.plans.map(
+          (p) => Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: _PlanCard(plan: p),
+          ),
+        ),
       ],
     );
   }
@@ -296,25 +360,16 @@ class _RecipeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => RecipeDetailScreen(recipe: recipe))),
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => RecipeDetailScreen(recipe: recipe)),
+      ),
       child: CardContainer(
         padding: EdgeInsets.zero,
         onTap: null,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              height: 6,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    AppColors.brand500.withValues(alpha: 0.7),
-                    const Color(0xFFE879F9).withValues(alpha: 0.4),
-                    AppColors.rose100.withValues(alpha: 0.4),
-                  ],
-                ),
-              ),
-            ),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -327,26 +382,54 @@ class _RecipeCard extends StatelessWidget {
                           Wrap(
                             spacing: 8,
                             runSpacing: 4,
-                            children: recipe.tags.map((t) => Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: AppColors.brand50,
-                                borderRadius: BorderRadius.circular(999),
-                                border: Border.all(color: AppColors.brand500.withValues(alpha: 0.18)),
-                              ),
-                              child: Text(t, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.brand600)),
-                            )).toList(),
+                            children: recipe.tags
+                                .map(
+                                  (t) => Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.brand50,
+                                      borderRadius: BorderRadius.circular(999),
+                                      border: Border.all(
+                                        color: AppColors.brand500.withValues(
+                                          alpha: 0.18,
+                                        ),
+                                      ),
+                                    ),
+                                    child: Text(
+                                      t,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.brand600,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                                .toList(),
                           ),
                           const SizedBox(height: 8),
-                          Text(recipe.title, style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w800,
-                          ), maxLines: 1, overflow: TextOverflow.ellipsis),
+                          Text(
+                            recipe.title,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                           const SizedBox(height: 4),
-                          Text(recipe.desc, style: TextStyle(
-                            fontSize: 14,
-                            color: AppColors.slate600,
-                          ), maxLines: 3, overflow: TextOverflow.ellipsis),
+                          Text(
+                            recipe.desc,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: AppColors.slate600,
+                            ),
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                           const Spacer(),
                           Wrap(
                             spacing: 8,
@@ -361,7 +444,13 @@ class _RecipeCard extends StatelessWidget {
                     const SizedBox(width: 12),
                     ClipRRect(
                       borderRadius: BorderRadius.circular(16),
-                      child: Image.network(recipe.imageUrl, width: 112, height: 112, fit: BoxFit.cover, errorBuilder: (_, __, ___) => _placeholder(112)),
+                      child: Image.network(
+                        recipe.imageUrl,
+                        width: 112,
+                        height: 112,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => _placeholder(112),
+                      ),
                     ),
                   ],
                 ),
@@ -379,7 +468,14 @@ class _RecipeCard extends StatelessWidget {
       color: AppColors.slate50,
       borderRadius: BorderRadius.circular(999),
     ),
-    child: Text(text, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.slate700)),
+    child: Text(
+      text,
+      style: const TextStyle(
+        fontSize: 12,
+        fontWeight: FontWeight.w500,
+        color: AppColors.slate700,
+      ),
+    ),
   );
 
   Widget _placeholder(double size) => Container(
@@ -398,13 +494,21 @@ class _FoodGridItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => FoodDetailScreen(name: food.name))),
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => FoodDetailScreen(name: food.name)),
+      ),
       child: Container(
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.fromLTRB(8, 8, 8, 5),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(24),
-          boxShadow: [BoxShadow(color: AppColors.ink.withValues(alpha: 0.06), blurRadius: 4)],
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.ink.withValues(alpha: 0.06),
+              blurRadius: 4,
+            ),
+          ],
           border: Border.all(color: AppColors.rose100.withValues(alpha: 0.7)),
         ),
         child: Column(
@@ -413,28 +517,77 @@ class _FoodGridItem extends StatelessWidget {
               aspectRatio: 1,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
-                child: Image.network(food.imageUrl, fit: BoxFit.cover, errorBuilder: (_, __, ___) => _placeholder()),
+                child: Image.network(
+                  food.imageUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => _placeholder(),
+                ),
               ),
             ),
             const SizedBox(height: 6),
             Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Expanded(child: Text(food.name, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800), maxLines: 1, overflow: TextOverflow.ellipsis)),
-                if (food.recommended) Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                  decoration: BoxDecoration(color: AppColors.brand50, borderRadius: BorderRadius.circular(999), border: Border.all(color: AppColors.brand500.withValues(alpha: 0.18))),
-                  child: Text('荐', style: TextStyle(fontSize: 9, fontWeight: FontWeight.w600, color: AppColors.brand600)),
-                ),
+                if (food.recommended) ...[
+                  Text(
+                    food.name,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(width: 4),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 4,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.brand50,
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(
+                        color: AppColors.brand500.withValues(alpha: 0.18),
+                      ),
+                    ),
+                    child: Text(
+                      '荐',
+                      style: TextStyle(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.brand600,
+                      ),
+                    ),
+                  ),
+                ] else
+                  Text(
+                    food.name,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
               ],
             ),
-            Text(food.subtitle, style: TextStyle(fontSize: 10, color: AppColors.slate500), maxLines: 1, overflow: TextOverflow.ellipsis),
+            Text(
+              food.subtitle,
+              style: TextStyle(fontSize: 10, color: AppColors.slate500),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _placeholder() => Container(color: AppColors.slate200, child: const Icon(Icons.image_not_supported));
+  Widget _placeholder() => Container(
+    color: AppColors.slate200,
+    child: const Icon(Icons.image_not_supported),
+  );
 }
 
 class _PlanCard extends StatelessWidget {
@@ -445,7 +598,10 @@ class _PlanCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => PlanDetailScreen(plan: plan))),
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => PlanDetailScreen(plan: plan)),
+      ),
       child: CardContainer(
         padding: const EdgeInsets.all(16),
         onTap: null,
@@ -453,7 +609,13 @@ class _PlanCard extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(16),
-              child: Image.network(plan.imageUrl, width: 80, height: 80, fit: BoxFit.cover, errorBuilder: (_, __, ___) => _placeholder()),
+              child: Image.network(
+                plan.imageUrl,
+                width: 80,
+                height: 80,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => _placeholder(),
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -463,17 +625,46 @@ class _PlanCard extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: Text(plan.name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        child: Text(
+                          plan.name,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w800,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(color: AppColors.brand50, borderRadius: BorderRadius.circular(999), border: Border.all(color: AppColors.brand500.withValues(alpha: 0.18))),
-                        child: Text('${plan.days} 天', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.brand600)),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.brand50,
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(
+                            color: AppColors.brand500.withValues(alpha: 0.18),
+                          ),
+                        ),
+                        child: Text(
+                          '${plan.days} 天',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.brand600,
+                          ),
+                        ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 4),
-                  Text(plan.desc, style: TextStyle(fontSize: 12, color: AppColors.slate600), maxLines: 2, overflow: TextOverflow.ellipsis),
+                  Text(
+                    plan.desc,
+                    style: TextStyle(fontSize: 12, color: AppColors.slate600),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ],
               ),
             ),
@@ -483,5 +674,10 @@ class _PlanCard extends StatelessWidget {
     );
   }
 
-  Widget _placeholder() => Container(width: 80, height: 80, color: AppColors.slate200, child: const Icon(Icons.image_not_supported));
+  Widget _placeholder() => Container(
+    width: 80,
+    height: 80,
+    color: AppColors.slate200,
+    child: const Icon(Icons.image_not_supported),
+  );
 }

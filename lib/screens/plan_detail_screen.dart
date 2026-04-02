@@ -80,24 +80,11 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('计划详情', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.slate500)),
               Text('${widget.plan.name}（${widget.plan.days} 天）', style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w800,
                 letterSpacing: -0.5,
               )),
             ],
-          ),
-        ),
-        GestureDetector(
-          onTap: () => Navigator.popUntil(context, (r) => r.isFirst),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.8),
-              borderRadius: BorderRadius.circular(999),
-              border: Border.all(color: AppColors.slate200.withValues(alpha: 0.7)),
-            ),
-            child: Text('首页', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.slate700)),
           ),
         ),
       ],
@@ -175,17 +162,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('今日安排', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
-                Text('示例：第 $_activeDay 天', style: TextStyle(fontSize: 12, color: AppColors.slate500)),
               ],
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.8),
-                borderRadius: BorderRadius.circular(999),
-                border: Border.all(color: AppColors.slate200.withValues(alpha: 0.7)),
-              ),
-              child: Text('可替换为真实数据', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.slate600)),
             ),
           ],
         ),

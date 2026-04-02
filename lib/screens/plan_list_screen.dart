@@ -13,52 +13,49 @@ class PlanListScreen extends StatelessWidget {
       body: Container(
         decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
         child: SafeArea(
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildHeader(context),
-                  const SizedBox(height: 16),
-                  CardContainer(
-                    padding: const EdgeInsets.all(12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          bottom: false, // 移除底部安全区域以避免额外空间
+          child: Column(
+            children: [
+              const SizedBox(height: 12),
+              _buildHeader(context),
+              const SizedBox(height: 16),
+              Expanded( // 使用Expanded让内容填充剩余空间
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CardContainer(
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text('为你精选', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
-                                Text('点卡片进入计划详情', style: TextStyle(fontSize: 12, color: AppColors.slate500)),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('为你精选', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+                                    Text('点卡片进入计划详情', style: TextStyle(fontSize: 12, color: AppColors.slate500)),
+                                  ],
+                                ),
                               ],
                             ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: AppColors.brand50,
-                                borderRadius: BorderRadius.circular(999),
-                                border: Border.all(color: AppColors.brand500.withValues(alpha: 0.18)),
-                              ),
-                              child: Text('静态示例', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.brand600)),
-                            ),
+                            const SizedBox(height: 12),
+                            ...MockData.plans.map((p) => Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: _PlanCard(plan: p, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => PlanDetailScreen(plan: p)))),
+                            )),
                           ],
                         ),
-                        const SizedBox(height: 12),
-                        ...MockData.plans.map((p) => Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: _PlanCard(plan: p, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => PlanDetailScreen(plan: p)))),
-                        )),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(height: 32),
+                    ],
                   ),
-                  const SizedBox(height: 32),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ),
@@ -68,6 +65,7 @@ class PlanListScreen extends StatelessWidget {
   Widget _buildHeader(BuildContext context) {
     return Row(
       children: [
+        const SizedBox(width: 20),
         GestureDetector(
           onTap: () => Navigator.pop(context),
           child: Container(
@@ -87,24 +85,11 @@ class PlanListScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('更多', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.slate500)),
               Text('饮食计划', style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w800,
                 letterSpacing: -0.5,
               )),
             ],
-          ),
-        ),
-        GestureDetector(
-          onTap: () => Navigator.popUntil(context, (r) => r.isFirst),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.8),
-              borderRadius: BorderRadius.circular(999),
-              border: Border.all(color: AppColors.slate200.withValues(alpha: 0.7)),
-            ),
-            child: Text('首页', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.slate700)),
           ),
         ),
       ],
