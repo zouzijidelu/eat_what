@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
-import 'recipe_detail_screen.dart';
-import '../data/mock_data.dart';
+import '../api/api_client.dart';
+import '../api/api_models.dart';
 import '../widgets/card_container.dart';
 
 class FoodDetailScreen extends StatelessWidget {
+  final int foodId;
   final String name;
+  final String? thumbImageUrl;
 
-  const FoodDetailScreen({super.key, required this.name});
+  const FoodDetailScreen({
+    super.key,
+    required this.foodId,
+    required this.name,
+    this.thumbImageUrl,
+  });
 
   static const _imgFood = 'https://placehold.co/240x240/png?text=%E9%A3%9F%E7%89%A9';
   static const _imgRecipe = 'https://placehold.co/200x200/png?text=%E8%8F%9C%E8%B0%B1';
@@ -28,7 +35,17 @@ class FoodDetailScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   _buildInfoCard(context),
                   const SizedBox(height: 16),
-                  _buildNutrients(context),
+                  FutureBuilder<List<FoodNutritionItem>>(
+                    future: ApiClient.instance.getFoodNutritionDetail(foodId: foodId),
+                    builder: (context, snapshot) {
+                      final items = snapshot.data ?? const <FoodNutritionItem>[];
+                      return _buildNutrients(
+                        context,
+                        items: items,
+                        hasError: snapshot.hasError,
+                      );
+                    },
+                  ),
                   const SizedBox(height: 24),
                   _buildRecommendedWays(context),
                   const SizedBox(height: 24),
@@ -70,11 +87,18 @@ class FoodDetailScreen extends StatelessWidget {
   }
 
   Widget _buildInfoCard(BuildContext context) {
+    final imageUrl = ApiClient.absoluteUrl(thumbImageUrl);
     return CardContainer(
       child: Row(
         children: [
           ClipOval(
-            child: Image.network(_imgFood, width: 96, height: 96, fit: BoxFit.cover, errorBuilder: (_, __, ___) => _placeholder(96)),
+            child: Image.network(
+              imageUrl.isEmpty ? _imgFood : imageUrl,
+              width: 96,
+              height: 96,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => _placeholder(96),
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -112,12 +136,40 @@ class FoodDetailScreen extends StatelessWidget {
     child: Text(text, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: brand ? AppColors.brand600 : AppColors.slate700)),
   );
 
-  Widget _buildNutrients(BuildContext context) {
+  Widget _buildNutrients(
+    BuildContext context, {
+    required List<FoodNutritionItem> items,
+    required bool hasError,
+  }) {
+    if (hasError) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('营养素', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+          const SizedBox(height: 12),
+          Text('营养素加载失败', style: TextStyle(fontSize: 12, color: AppColors.slate600)),
+        ],
+      );
+    }
+
+    if (items.isEmpty) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('营养素', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+          const SizedBox(height: 12),
+          Text('暂无营养素数据', style: TextStyle(fontSize: 12, color: AppColors.slate600)),
+        ],
+      );
+    }
+
+    final cells = items.take(8).toList();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('营养素', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
-        Text('每 100g 含量', style: TextStyle(fontSize: 12, color: AppColors.slate500)),
+        Text('每 ${items.first.weigh}g 含量（接口单位）', style: TextStyle(fontSize: 12, color: AppColors.slate500)),
         const SizedBox(height: 12),
         GridView.count(
           shrinkWrap: true,
@@ -126,12 +178,16 @@ class FoodDetailScreen extends StatelessWidget {
           mainAxisSpacing: 8,
           crossAxisSpacing: 8,
           childAspectRatio: 0.9,
-          children: [
-            _NutrientCell(icon: '🔥', label: '热量', value: '160kcal', brand: true),
-            _NutrientCell(icon: '🍗', label: '蛋白质', value: '2g'),
-            _NutrientCell(icon: '🍚', label: '碳水', value: '9g'),
-            _NutrientCell(icon: '🥑', label: '脂肪', value: '15g'),
-          ],
+          children: cells
+              .map(
+                (n) => _NutrientCell(
+                  icon: '•',
+                  label: n.name,
+                  value: '${n.value}${n.unit}',
+                  brand: false,
+                ),
+              )
+              .toList(),
         ),
       ],
     );
@@ -151,47 +207,22 @@ class FoodDetailScreen extends StatelessWidget {
   }
 
   Widget _buildRelatedRecipes(BuildContext context) {
-    final recipe = MockData.recipes[1]; // 香煎鸡胸沙拉
+    // 当前接口未提供「相关菜谱」列表接口，因此先做占位。
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text('相关菜谱', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
-            GestureDetector(
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => RecipeDetailScreen(recipe: recipe))),
-              child: Text('去看看 →', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.brand600)),
-            ),
-          ],
-        ),
+        Text('相关菜谱', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
         const SizedBox(height: 12),
-        GestureDetector(
-          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => RecipeDetailScreen(recipe: recipe))),
-          child: CardContainer(
-            child: Row(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: Image.network(_imgRecipe, width: 64, height: 64, fit: BoxFit.cover, errorBuilder: (_, __, ___) => _placeholder(64)),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(child: Text(recipe.title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800), maxLines: 1, overflow: TextOverflow.ellipsis)),
-                          _tag('20 分钟'),
-                        ],
-                      ),
-                      Text(recipe.desc, style: TextStyle(fontSize: 12, color: AppColors.slate600), maxLines: 2, overflow: TextOverflow.ellipsis),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.rose50.withValues(alpha: 0.25),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: AppColors.rose100.withValues(alpha: 0.7)),
+          ),
+          child: Text(
+            '暂无相关菜谱数据',
+            style: TextStyle(fontSize: 12, color: AppColors.slate600),
           ),
         ),
       ],

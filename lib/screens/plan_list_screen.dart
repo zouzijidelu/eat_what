@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
-import '../data/mock_data.dart';
+import '../api/api_client.dart';
+import '../api/api_models.dart';
 import 'plan_detail_screen.dart';
 import '../widgets/card_container.dart';
 
@@ -43,10 +44,38 @@ class PlanListScreen extends StatelessWidget {
                               ],
                             ),
                             const SizedBox(height: 12),
-                            ...MockData.plans.map((p) => Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: _PlanCard(plan: p, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => PlanDetailScreen(plan: p)))),
-                            )),
+                            FutureBuilder<DietPlanListPayload>(
+                              future: ApiClient.instance.getDietPlanList(page: 1, limit: 10),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState != ConnectionState.done) {
+                                  return const Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 24),
+                                    child: Center(child: CircularProgressIndicator()),
+                                  );
+                                }
+                                final plans = snapshot.data?.list ?? const <DietPlanSummary>[];
+                                if (plans.isEmpty) {
+                                  return const Padding(
+                                    padding: EdgeInsets.only(bottom: 12),
+                                    child: Text('暂无计划', style: TextStyle(color: AppColors.slate600)),
+                                  );
+                                }
+                                return Column(
+                                  children: plans.map(
+                                    (p) => Padding(
+                                      padding: const EdgeInsets.only(bottom: 12),
+                                      child: _PlanCard(
+                                        plan: p,
+                                        onTap: () => Navigator.push(
+                                          context,
+                                          MaterialPageRoute(builder: (_) => PlanDetailScreen(plan: p)),
+                                        ),
+                                      ),
+                                    ),
+                                  ).toList(),
+                                );
+                              },
+                            ),
                           ],
                         ),
                       ),
@@ -98,7 +127,7 @@ class PlanListScreen extends StatelessWidget {
 }
 
 class _PlanCard extends StatelessWidget {
-  final PlanItem plan;
+  final DietPlanSummary plan;
   final VoidCallback onTap;
 
   const _PlanCard({required this.plan, required this.onTap});
@@ -119,7 +148,13 @@ class _PlanCard extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(16),
-              child: Image.network(plan.imageUrl, width: 80, height: 80, fit: BoxFit.cover, errorBuilder: (_, __, ___) => _placeholder()),
+              child: Image.network(
+                ApiClient.absoluteUrl(plan.image),
+                width: 80,
+                height: 80,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => _placeholder(),
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -138,12 +173,12 @@ class _PlanCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(999),
                           border: Border.all(color: AppColors.brand500.withValues(alpha: 0.18)),
                         ),
-                        child: Text('${plan.days} 天', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.brand600)),
+                        child: Text('${plan.dayCount} 天', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.brand600)),
                       ),
                     ],
                   ),
                   const SizedBox(height: 4),
-                  Text(plan.desc, style: TextStyle(fontSize: 12, color: AppColors.slate600), maxLines: 2, overflow: TextOverflow.ellipsis),
+                  Text('周期：${plan.cycle}，累计${plan.userCount}人使用', style: TextStyle(fontSize: 12, color: AppColors.slate600), maxLines: 2, overflow: TextOverflow.ellipsis),
                 ],
               ),
             ),

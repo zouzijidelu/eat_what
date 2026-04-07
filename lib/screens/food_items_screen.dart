@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
-import '../data/mock_data.dart';
+import '../api/api_client.dart';
+import '../api/api_models.dart';
 import 'food_detail_screen.dart';
 import '../widgets/card_container.dart';
 
 class FoodItemsScreen extends StatefulWidget {
-  final String category;
+  final int rankId;
+  final String categoryName;
 
-  const FoodItemsScreen({super.key, required this.category});
+  const FoodItemsScreen({super.key, required this.rankId, required this.categoryName});
 
   @override
   State<FoodItemsScreen> createState() => _FoodItemsScreenState();
@@ -15,24 +17,35 @@ class FoodItemsScreen extends StatefulWidget {
 
 class _FoodItemsScreenState extends State<FoodItemsScreen> {
   final _searchController = TextEditingController();
-  List<Map<String, String>> _items = [];
-  List<Map<String, String>> _filtered = [];
+  List<FoodListItem> _items = [];
+  List<FoodListItem> _filtered = [];
+  bool _loading = true;
 
   @override
   void initState() {
     super.initState();
-    _items = List<Map<String, String>>.from(
-      MockData.foodItemsByCategory[widget.category] ??
-      [{'name': '示例食物 A', 'tag': '占位', 'kcal': '—'}, {'name': '示例食物 B', 'tag': '占位', 'kcal': '—'}],
-    );
-    _filtered = _items;
     _searchController.addListener(_onSearch);
+    ApiClient.instance.getFoodList(rankId: widget.rankId).then((value) {
+      if (!mounted) return;
+      setState(() {
+        _items = value;
+        _filtered = value;
+        _loading = false;
+      });
+    }).catchError((_) {
+      if (!mounted) return;
+      setState(() {
+        _items = const [];
+        _filtered = const [];
+        _loading = false;
+      });
+    });
   }
 
   void _onSearch() {
     final q = _searchController.text.trim().toLowerCase();
     setState(() {
-      _filtered = q.isEmpty ? _items : _items.where((x) => (x['name'] ?? '').toLowerCase().contains(q)).toList();
+      _filtered = q.isEmpty ? _items : _items.where((x) => x.name.toLowerCase().contains(q)).toList();
     });
   }
 
@@ -42,8 +55,6 @@ class _FoodItemsScreenState extends State<FoodItemsScreen> {
     _searchController.dispose();
     super.dispose();
   }
-
-  String _imgUrl(String name) => 'https://placehold.co/200x200/png?text=${Uri.encodeComponent(name)}';
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +84,7 @@ class _FoodItemsScreenState extends State<FoodItemsScreen> {
                           children: [
                             Text('共 ${_filtered.length} 个食物', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.slate500)),
                             GestureDetector(
-                              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const FoodDetailScreen(name: '牛油果'))),
+                              onTap: () {},
                               child: Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                 decoration: BoxDecoration(
@@ -112,11 +123,20 @@ class _FoodItemsScreenState extends State<FoodItemsScreen> {
                                 itemBuilder: (_, i) {
                                   final item = _filtered[i];
                                   return _FoodListItem(
-                                    name: item['name'] ?? '',
-                                    tag: item['tag'] ?? '',
-                                    kcal: item['kcal'] ?? '',
-                                    imageUrl: _imgUrl(item['name'] ?? ''),
-                                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => FoodDetailScreen(name: item['name'] ?? ''))),
+                                    name: item.name,
+                                    tag: (item.healthLabel ?? item.suggest ?? '').toString(),
+                                    kcal: item.calory == null ? '—' : '${item.calory}kcal',
+                                    imageUrl: ApiClient.absoluteUrl(item.thumbImageUrl),
+                                    onTap: () => Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => FoodDetailScreen(
+                                          foodId: item.id,
+                                          name: item.name,
+                                          thumbImageUrl: item.thumbImageUrl,
+                                        ),
+                                      ),
+                                    ),
                                   );
                                 },
                               ),
@@ -158,7 +178,7 @@ class _FoodItemsScreenState extends State<FoodItemsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('食物列表', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.slate500)),
-                Text(widget.category, style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                Text(widget.categoryName, style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w800,
                   letterSpacing: -0.5,
                 )),

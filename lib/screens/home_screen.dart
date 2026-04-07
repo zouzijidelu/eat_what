@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
-import '../data/mock_data.dart';
+import '../api/api_client.dart';
+import '../api/api_models.dart';
 import 'food_list_screen.dart';
-import 'food_detail_screen.dart';
 import 'plan_list_screen.dart';
 import 'plan_detail_screen.dart';
 import 'recipe_detail_screen.dart';
@@ -18,15 +18,36 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final _recipeController = PageController(viewportFraction: 0.92);
   int _recipeIndex = 0;
+  List<CaipinSummary> _recommend = const [];
+  Future<DietPlanListPayload>? _futurePlans;
 
   @override
   void initState() {
     super.initState();
-    // 自动轮播
+    _futurePlans = ApiClient.instance.getDietPlanList(page: 1, limit: 3);
+    _loadRecommend();
+  }
+
+  Future<void> _loadRecommend() async {
+    try {
+      final list = await ApiClient.instance.recommendFoodList();
+      if (!mounted) return;
+      setState(() {
+        _recommend = list;
+        _recipeIndex = 0;
+      });
+      _startAutoPlay();
+    } catch (_) {
+      // 失败时保留当前 UI（不阻塞页面）
+    }
+  }
+
+  void _startAutoPlay() {
     Future.doWhile(() async {
       await Future.delayed(const Duration(seconds: 4));
       if (!mounted) return false;
-      final next = (_recipeIndex + 1) % MockData.recipes.length;
+      if (_recommend.isEmpty) return true;
+      final next = (_recipeIndex + 1) % _recommend.length;
       _recipeController.animateToPage(
         next,
         duration: const Duration(milliseconds: 400),
@@ -202,13 +223,13 @@ class _HomeScreenState extends State<HomeScreen> {
               height: 220,
               child: PageView.builder(
                 controller: _recipeController,
-                itemCount: MockData.recipes.length,
+                itemCount: _recommend.isEmpty ? 1 : _recommend.length,
                 onPageChanged: (i) => setState(() => _recipeIndex = i),
                 itemBuilder: (context, i) {
-                  final r = MockData.recipes[i];
+                  final c = _recommend.isEmpty ? null : _recommend[i];
                   return Padding(
                     padding: const EdgeInsets.fromLTRB(4, 0, 4, 28),
-                    child: _RecipeCard(recipe: r),
+                    child: _RecipeCard(caipin: c),
                   );
                 },
               ),
@@ -217,7 +238,7 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.only(bottom: 12),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(MockData.recipes.length, (i) {
+                children: List.generate(_recommend.isEmpty ? 1 : _recommend.length, (i) {
                   return Container(
                     margin: const EdgeInsets.symmetric(horizontal: 4),
                     width: 8,
@@ -289,9 +310,10 @@ class _HomeScreenState extends State<HomeScreen> {
           mainAxisSpacing: 8,
           crossAxisSpacing: 8,
           childAspectRatio: 0.7,
-          children: MockData.homeFoods
-              .map((f) => _FoodGridItem(food: f))
-              .toList(),
+          children: List.generate(4, (i) {
+            final item = _recommend.isEmpty || _recommend.length <= i ? null : _recommend[i];
+            return _FoodGridItem(caipin: item);
+          }),
         ),
       ],
     );
@@ -341,11 +363,30 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         const SizedBox(height: 12),
-        ...MockData.plans.map(
-          (p) => Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: _PlanCard(plan: p),
-          ),
+        FutureBuilder<DietPlanListPayload>(
+          future: _futurePlans,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState != ConnectionState.done) {
+              return const Padding(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
+            final plans = snapshot.data?.list ?? const <DietPlanSummary>[];
+            if (plans.isEmpty) {
+              return const Text('暂无计划', style: TextStyle(color: AppColors.slate600));
+            }
+            return Column(
+              children: plans
+                  .map(
+                    (p) => Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: _PlanCard(plan: p),
+                    ),
+                  )
+                  .toList(),
+            );
+          },
         ),
       ],
     );
@@ -353,17 +394,30 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 class _RecipeCard extends StatelessWidget {
-  final RecipeItem recipe;
+  final CaipinSummary? caipin;
 
-  const _RecipeCard({required this.recipe});
+  const _RecipeCard({required this.caipin});
 
   @override
   Widget build(BuildContext context) {
+    final imageUrl = caipin == null ? '' : ApiClient.absoluteUrl(caipin!.image);
+    final title = caipin?.name ?? '暂无数据';
+    final desc = caipin?.desc ?? '';
+
     return GestureDetector(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => RecipeDetailScreen(recipe: recipe)),
-      ),
+      onTap: caipin == null
+          ? null
+          : () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => RecipeDetailScreen(
+                    caipinId: caipin!.id,
+                    fallbackTitle: title,
+                    fallbackDesc: desc,
+                    fallbackImageUrl: imageUrl,
+                  ),
+                ),
+              ),
       child: CardContainer(
         padding: EdgeInsets.zero,
         onTap: null,
@@ -382,37 +436,14 @@ class _RecipeCard extends StatelessWidget {
                           Wrap(
                             spacing: 8,
                             runSpacing: 4,
-                            children: recipe.tags
-                                .map(
-                                  (t) => Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 2,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.brand50,
-                                      borderRadius: BorderRadius.circular(999),
-                                      border: Border.all(
-                                        color: AppColors.brand500.withValues(
-                                          alpha: 0.18,
-                                        ),
-                                      ),
-                                    ),
-                                    child: Text(
-                                      t,
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                        color: AppColors.brand600,
-                                      ),
-                                    ),
-                                  ),
-                                )
-                                .toList(),
+                            children: [
+                              _chip('推荐'),
+                              if (caipin?.calory != null) _chip('${caipin!.calory}kcal'),
+                            ],
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            recipe.title,
+                            title,
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w800,
@@ -422,7 +453,7 @@ class _RecipeCard extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            recipe.desc,
+                            desc,
                             style: TextStyle(
                               fontSize: 14,
                               color: AppColors.slate600,
@@ -434,8 +465,7 @@ class _RecipeCard extends StatelessWidget {
                           Wrap(
                             spacing: 8,
                             children: [
-                              _chip(recipe.duration),
-                              _chip(recipe.category),
+                              _chip('菜谱'),
                             ],
                           ),
                         ],
@@ -445,7 +475,7 @@ class _RecipeCard extends StatelessWidget {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(16),
                       child: Image.network(
-                        recipe.imageUrl,
+                        imageUrl.isEmpty ? 'https://placehold.co/112x112/png?text=%E9%A4%90%E8%B0%B1' : imageUrl,
                         width: 112,
                         height: 112,
                         fit: BoxFit.cover,
@@ -487,17 +517,30 @@ class _RecipeCard extends StatelessWidget {
 }
 
 class _FoodGridItem extends StatelessWidget {
-  final FoodItem food;
+  final CaipinSummary? caipin;
 
-  const _FoodGridItem({required this.food});
+  const _FoodGridItem({required this.caipin});
 
   @override
   Widget build(BuildContext context) {
+    final imageUrl = caipin == null ? '' : ApiClient.absoluteUrl(caipin!.image);
+    final name = caipin?.name ?? '—';
+    final subtitle = caipin?.calory == null ? '—' : '${caipin!.calory}kcal';
+
     return GestureDetector(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => FoodDetailScreen(name: food.name)),
-      ),
+      onTap: caipin == null
+          ? null
+          : () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => RecipeDetailScreen(
+                    caipinId: caipin!.id,
+                    fallbackTitle: name,
+                    fallbackDesc: caipin!.desc,
+                    fallbackImageUrl: imageUrl,
+                  ),
+                ),
+              ),
       child: Container(
         padding: const EdgeInsets.fromLTRB(8, 8, 8, 5),
         decoration: BoxDecoration(
@@ -518,62 +561,28 @@ class _FoodGridItem extends StatelessWidget {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
                 child: Image.network(
-                  food.imageUrl,
+                  imageUrl.isEmpty ? 'https://placehold.co/200x200/png?text=%E5%8D%A0%E4%BD%8D' : imageUrl,
                   fit: BoxFit.cover,
                   errorBuilder: (_, __, ___) => _placeholder(),
                 ),
               ),
             ),
             const SizedBox(height: 6),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (food.recommended) ...[
-                  Text(
-                    food.name,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w800,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(width: 4),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 4,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.brand50,
-                      borderRadius: BorderRadius.circular(999),
-                      border: Border.all(
-                        color: AppColors.brand500.withValues(alpha: 0.18),
-                      ),
-                    ),
-                    child: Text(
-                      '荐',
-                      style: TextStyle(
-                        fontSize: 9,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.brand600,
-                      ),
-                    ),
-                  ),
-                ] else
-                  Text(
-                    food.name,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w800,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-              ],
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 2),
+              child: Text(
+                name,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+              ),
             ),
             Text(
-              food.subtitle,
+              subtitle,
               style: TextStyle(fontSize: 10, color: AppColors.slate500),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -591,12 +600,13 @@ class _FoodGridItem extends StatelessWidget {
 }
 
 class _PlanCard extends StatelessWidget {
-  final PlanItem plan;
+  final DietPlanSummary plan;
 
   const _PlanCard({required this.plan});
 
   @override
   Widget build(BuildContext context) {
+    final imageUrl = ApiClient.absoluteUrl(plan.image);
     return GestureDetector(
       onTap: () => Navigator.push(
         context,
@@ -610,7 +620,7 @@ class _PlanCard extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(16),
               child: Image.network(
-                plan.imageUrl,
+                imageUrl.isEmpty ? 'https://placehold.co/80x80/png?text=%E8%AE%A1%E5%88%92' : imageUrl,
                 width: 80,
                 height: 80,
                 fit: BoxFit.cover,
@@ -648,7 +658,7 @@ class _PlanCard extends StatelessWidget {
                           ),
                         ),
                         child: Text(
-                          '${plan.days} 天',
+                          '${plan.dayCount} 天',
                           style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
@@ -660,7 +670,7 @@ class _PlanCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    plan.desc,
+                    '周期：${plan.cycle}',
                     style: TextStyle(fontSize: 12, color: AppColors.slate600),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
-import '../data/mock_data.dart';
+import '../api/api_client.dart';
+import '../api/api_models.dart';
 import 'food_items_screen.dart';
 import 'food_detail_screen.dart';
 import '../widgets/card_container.dart';
@@ -13,7 +14,20 @@ class FoodListScreen extends StatefulWidget {
 }
 
 class _FoodListScreenState extends State<FoodListScreen> {
-  String _activeId = MockData.foodCategories.first.id;
+  String _activeId = '';
+  List<FoodCategory> _categories = const [];
+
+  @override
+  void initState() {
+    super.initState();
+    ApiClient.instance.getFoodCateList().then((value) {
+      if (!mounted) return;
+      setState(() {
+        _categories = value;
+        _activeId = value.isNotEmpty ? value.first.id.toString() : '';
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -89,14 +103,14 @@ class _FoodListScreenState extends State<FoodListScreen> {
       ),
       child: ListView(
         padding: const EdgeInsets.all(8),
-        children: MockData.foodCategories.map((c) {
-          final isActive = c.id == _activeId;
+        children: _categories.map((c) {
+          final isActive = c.id.toString() == _activeId;
           return Padding(
             padding: const EdgeInsets.only(bottom: 4),
             child: Material(
               color: Colors.transparent,
               child: InkWell(
-                onTap: () => setState(() => _activeId = c.id),
+                onTap: () => setState(() => _activeId = c.id.toString()),
                 borderRadius: BorderRadius.circular(16),
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -122,7 +136,10 @@ class _FoodListScreenState extends State<FoodListScreen> {
   }
 
   Widget _buildSecondaryGrid() {
-    final category = MockData.foodCategories.firstWhere((c) => c.id == _activeId, orElse: () => MockData.foodCategories.first);
+    if (_categories.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    final category = _categories.firstWhere((c) => c.id.toString() == _activeId, orElse: () => _categories.first);
     return Padding(
       padding: const EdgeInsets.all(12),
       child: Column(
@@ -139,7 +156,7 @@ class _FoodListScreenState extends State<FoodListScreen> {
                 ],
               ),
               GestureDetector(
-                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const FoodDetailScreen(name: '牛油果'))),
+                onTap: () {},
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
@@ -159,11 +176,12 @@ class _FoodListScreenState extends State<FoodListScreen> {
               mainAxisSpacing: 8,
               crossAxisSpacing: 8,
               childAspectRatio: 0.75,
-              children: category.items.map((i) => _SubCategoryItem(
-                name: i.name,
-                desc: i.desc,
-                img: i.img,
-              )).toList(),
+              children: category.subs.map((i) => _SubCategoryItem(
+                    name: i.name,
+                    desc: i.desc,
+                    img: i.image,
+                    rankId: i.rankId,
+                  )).toList(),
             ),
           ),
         ],
@@ -176,14 +194,20 @@ class _SubCategoryItem extends StatelessWidget {
   final String name;
   final String desc;
   final String img;
+  final int rankId;
 
-  const _SubCategoryItem({required this.name, required this.desc, required this.img});
+  const _SubCategoryItem({
+    required this.name,
+    required this.desc,
+    required this.img,
+    required this.rankId,
+  });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () => Navigator.push(context, MaterialPageRoute(
-        builder: (_) => FoodItemsScreen(category: name),
+        builder: (_) => FoodItemsScreen(rankId: rankId, categoryName: name),
       )),
       child: Container(
         padding: const EdgeInsets.all(8),
