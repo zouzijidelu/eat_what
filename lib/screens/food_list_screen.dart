@@ -3,7 +3,6 @@ import '../theme/app_colors.dart';
 import '../api/api_client.dart';
 import '../api/api_models.dart';
 import 'food_items_screen.dart';
-import 'food_detail_screen.dart';
 import '../widgets/card_container.dart';
 
 class FoodListScreen extends StatefulWidget {
@@ -224,7 +223,11 @@ class _SubCategoryItem extends StatelessWidget {
               aspectRatio: 1,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
-                child: Image.network(img, fit: BoxFit.cover, errorBuilder: (_, __, ___) => _placeholder()),
+                child: Image.network(
+                  ApiClient.absoluteUrl(img),
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => _placeholder(),
+                ),
               ),
             ),
             const SizedBox(height: 6),

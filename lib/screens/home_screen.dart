@@ -5,6 +5,7 @@ import '../api/api_models.dart';
 import 'food_list_screen.dart';
 import 'plan_list_screen.dart';
 import 'plan_detail_screen.dart';
+import 'food_detail_screen.dart';
 import 'recipe_detail_screen.dart';
 import '../widgets/card_container.dart';
 
@@ -18,7 +19,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final _recipeController = PageController(viewportFraction: 0.92);
   int _recipeIndex = 0;
-  List<CaipinSummary> _recommend = const [];
+  List<CaipinSummary> _recipeRecommend = const [];
+  List<RcmdFoodItem> _ingredientRecommend = const [];
   Future<DietPlanListPayload>? _futurePlans;
 
   @override
@@ -29,25 +31,33 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadRecommend() async {
+    List<CaipinSummary> recipes = _recipeRecommend;
+    List<RcmdFoodItem> ingredients = _ingredientRecommend;
     try {
-      final list = await ApiClient.instance.recommendFoodList();
-      if (!mounted) return;
-      setState(() {
-        _recommend = list;
-        _recipeIndex = 0;
-      });
-      _startAutoPlay();
+      recipes = await ApiClient.instance.recommendFoodList();
     } catch (_) {
-      // 失败时保留当前 UI（不阻塞页面）
+      // 保留原数据
     }
+    try {
+      ingredients = await ApiClient.instance.rcmdFoodList();
+    } catch (_) {
+      // 保留原数据
+    }
+    if (!mounted) return;
+    setState(() {
+      _recipeRecommend = recipes;
+      _ingredientRecommend = ingredients;
+      _recipeIndex = 0;
+    });
+    _startAutoPlay();
   }
 
   void _startAutoPlay() {
     Future.doWhile(() async {
       await Future.delayed(const Duration(seconds: 4));
       if (!mounted) return false;
-      if (_recommend.isEmpty) return true;
-      final next = (_recipeIndex + 1) % _recommend.length;
+      if (_recipeRecommend.isEmpty) return true;
+      final next = (_recipeIndex + 1) % _recipeRecommend.length;
       _recipeController.animateToPage(
         next,
         duration: const Duration(milliseconds: 400),
@@ -223,10 +233,10 @@ class _HomeScreenState extends State<HomeScreen> {
               height: 220,
               child: PageView.builder(
                 controller: _recipeController,
-                itemCount: _recommend.isEmpty ? 1 : _recommend.length,
+                itemCount: _recipeRecommend.isEmpty ? 1 : _recipeRecommend.length,
                 onPageChanged: (i) => setState(() => _recipeIndex = i),
                 itemBuilder: (context, i) {
-                  final c = _recommend.isEmpty ? null : _recommend[i];
+                  final c = _recipeRecommend.isEmpty ? null : _recipeRecommend[i];
                   return Padding(
                     padding: const EdgeInsets.fromLTRB(4, 0, 4, 28),
                     child: _RecipeCard(caipin: c),
@@ -238,7 +248,7 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.only(bottom: 12),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(_recommend.isEmpty ? 1 : _recommend.length, (i) {
+                children: List.generate(_recipeRecommend.isEmpty ? 1 : _recipeRecommend.length, (i) {
                   return Container(
                     margin: const EdgeInsets.symmetric(horizontal: 4),
                     width: 8,
@@ -267,7 +277,7 @@ class _HomeScreenState extends State<HomeScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              '食物推荐',
+              '食材推荐',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w800,
                 letterSpacing: -0.5,
@@ -311,8 +321,10 @@ class _HomeScreenState extends State<HomeScreen> {
           crossAxisSpacing: 8,
           childAspectRatio: 0.7,
           children: List.generate(4, (i) {
-            final item = _recommend.isEmpty || _recommend.length <= i ? null : _recommend[i];
-            return _FoodGridItem(caipin: item);
+            final item = _ingredientRecommend.isEmpty || _ingredientRecommend.length <= i
+                ? null
+                : _ingredientRecommend[i];
+            return _FoodGridItem(food: item);
           }),
         ),
       ],
@@ -517,27 +529,27 @@ class _RecipeCard extends StatelessWidget {
 }
 
 class _FoodGridItem extends StatelessWidget {
-  final CaipinSummary? caipin;
+  final RcmdFoodItem? food;
 
-  const _FoodGridItem({required this.caipin});
+  const _FoodGridItem({required this.food});
 
   @override
   Widget build(BuildContext context) {
-    final imageUrl = caipin == null ? '' : ApiClient.absoluteUrl(caipin!.image);
-    final name = caipin?.name ?? '—';
-    final subtitle = caipin?.calory == null ? '—' : '${caipin!.calory}kcal';
+    final imageUrl = food == null ? '' : ApiClient.absoluteUrl(food!.imagePathForDisplay);
+    final name = food?.name ?? '—';
+    final cal = (food?.calory ?? '').trim();
+    final subtitle = cal.isEmpty ? '—' : '${cal}kcal';
 
     return GestureDetector(
-      onTap: caipin == null
+      onTap: food == null
           ? null
           : () => Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => RecipeDetailScreen(
-                    caipinId: caipin!.id,
-                    fallbackTitle: name,
-                    fallbackDesc: caipin!.desc,
-                    fallbackImageUrl: imageUrl,
+                  builder: (_) => FoodDetailScreen(
+                    foodId: food!.id,
+                    name: name,
+                    thumbImageUrl: food!.thumbImageUrl ?? food!.largeImageUrl,
                   ),
                 ),
               ),

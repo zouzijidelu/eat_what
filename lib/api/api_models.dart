@@ -19,6 +19,119 @@ class ApiResponse<T> {
   bool get isOk => code == 1;
 }
 
+/// GET /sp/index/rcmdFoodList — 食材推荐列表
+class RcmdFoodItem {
+  final int id;
+  final String code;
+  final String name;
+  final String? suggest;
+  final String? healthLabel;
+  final String? healthLight;
+  final String? largeImageUrl;
+  final String? thumbImageUrl;
+  final String? joule;
+  final String? calory;
+  final int? categoryId;
+  final String? categoryName;
+  final int? categoryRank;
+  final String? giValue;
+  final String? giLabel;
+  final String? glValue;
+  final String? glLabel;
+  final String? fat;
+  final String? protein;
+  final String? carbohydrate;
+  final String? lights;
+  final String? warnings;
+  final String? warningScenes;
+  final int? weigh;
+  final int? rankId;
+  final int status;
+
+  const RcmdFoodItem({
+    required this.id,
+    required this.code,
+    required this.name,
+    required this.suggest,
+    required this.healthLabel,
+    required this.healthLight,
+    required this.largeImageUrl,
+    required this.thumbImageUrl,
+    required this.joule,
+    required this.calory,
+    required this.categoryId,
+    required this.categoryName,
+    required this.categoryRank,
+    required this.giValue,
+    required this.giLabel,
+    required this.glValue,
+    required this.glLabel,
+    required this.fat,
+    required this.protein,
+    required this.carbohydrate,
+    required this.lights,
+    required this.warnings,
+    required this.warningScenes,
+    required this.weigh,
+    required this.rankId,
+    required this.status,
+  });
+
+  factory RcmdFoodItem.fromJson(Map<String, dynamic> json) {
+    int? intOrNull(dynamic v) {
+      if (v == null) return null;
+      if (v is num) return v.toInt();
+      return int.tryParse('$v');
+    }
+
+    int intReq(dynamic v) => intOrNull(v) ?? 0;
+
+    return RcmdFoodItem(
+      id: intReq(json['id']),
+      code: (json['code'] ?? '').toString(),
+      name: (json['name'] ?? '').toString(),
+      suggest: json['suggest']?.toString(),
+      healthLabel: json['health_label']?.toString(),
+      healthLight: json['health_light']?.toString(),
+      largeImageUrl: json['large_image_url']?.toString(),
+      thumbImageUrl: json['thumb_image_url']?.toString(),
+      joule: json['joule']?.toString(),
+      calory: json['calory']?.toString(),
+      categoryId: intOrNull(json['category_id']),
+      categoryName: json['category_name']?.toString(),
+      categoryRank: intOrNull(json['category_rank']),
+      giValue: json['gi_value']?.toString(),
+      giLabel: json['gi_label']?.toString(),
+      glValue: json['gl_value']?.toString(),
+      glLabel: json['gl_label']?.toString(),
+      fat: json['fat']?.toString(),
+      protein: json['protein']?.toString(),
+      carbohydrate: json['carbohydrate']?.toString(),
+      lights: json['lights']?.toString(),
+      warnings: json['warnings']?.toString(),
+      warningScenes: json['warning_scenes']?.toString(),
+      weigh: intOrNull(json['weigh']),
+      rankId: intOrNull(json['rank_id']),
+      status: intReq(json['status']),
+    );
+  }
+
+  /// 优先大图，用于列表展示（相对路径，展示时需 ApiClient.absoluteUrl）
+  String get imagePathForDisplay {
+    final large = (largeImageUrl ?? '').trim();
+    if (large.isNotEmpty) return large;
+    return (thumbImageUrl ?? '').trim();
+  }
+
+  String get detailText {
+    final s = (suggest ?? '').trim();
+    if (s.isNotEmpty) return s;
+    final w = (warnings ?? '').trim();
+    if (w.isNotEmpty) return w;
+    return (categoryName ?? '').trim();
+  }
+}
+
 class CaipinSummary {
   final int id;
   final String name;

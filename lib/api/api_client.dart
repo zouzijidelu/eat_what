@@ -19,23 +19,29 @@ class ApiClient {
 
   static final ApiClient instance = ApiClient._();
 
-  /// TODO: 改成你的真实域名，例如 https://xxx.com
-  static const String baseUrl = 'https://audio.3dmaxmo.com/index.php';
+  /// 站点根域名（图片等相对路径只拼此地址，不含 index.php）
+  static const String origin = 'https://audio.3dmaxmo.com';
 
-  /// 如果后端返回的图片字段是相对路径（如 /storage/...），会自动拼上它
+  /// 接口入口脚本（与 [origin] 组合为完整 API 根路径）
+  static const String indexPhp = 'index.php';
+
+  /// API 根：`origin` + `/` + `index.php`，请求形如 `.../index.php/sp/index/...`
+  static String get apiBaseUrl => '$origin/$indexPhp';
+
+  /// 相对路径图片等转为完整 URL（仅使用 [origin]，不经过 index.php）
   static String absoluteUrl(String? url) {
     final u = (url ?? '').trim();
     if (u.isEmpty) return '';
     if (u.startsWith('http://') || u.startsWith('https://')) return u;
-    if (!u.startsWith('/')) return '$baseUrl/$u';
-    return '$baseUrl$u';
+    if (!u.startsWith('/')) return '$origin/$u';
+    return '$origin$u';
   }
 
   Future<Map<String, dynamic>> _getJson(
     String path, {
     Map<String, String>? query,
   }) async {
-    final uri = Uri.parse('$baseUrl$path').replace(queryParameters: query);
+    final uri = Uri.parse('$apiBaseUrl$path').replace(queryParameters: query);
     final resp = await http.get(uri);
 
     if (resp.statusCode != 200) {
@@ -62,7 +68,7 @@ class ApiClient {
     return res;
   }
 
-  /// GET /sp/index/recommendFoodList
+  /// GET /sp/index/recommendFoodList — 食谱推荐
   Future<List<CaipinSummary>> recommendFoodList() async {
     final res = await _getApi<List<CaipinSummary>>(
       '/sp/index/recommendFoodList',
@@ -73,6 +79,22 @@ class ApiClient {
               .toList();
         }
         return const <CaipinSummary>[];
+      },
+    );
+    return res.data;
+  }
+
+  /// GET /sp/index/rcmdFoodList — 食材推荐
+  Future<List<RcmdFoodItem>> rcmdFoodList() async {
+    final res = await _getApi<List<RcmdFoodItem>>(
+      '/sp/index/rcmdFoodList',
+      parseData: (d) {
+        if (d is List) {
+          return d
+              .map((e) => RcmdFoodItem.fromJson((e as Map).cast<String, dynamic>()))
+              .toList();
+        }
+        return const <RcmdFoodItem>[];
       },
     );
     return res.data;

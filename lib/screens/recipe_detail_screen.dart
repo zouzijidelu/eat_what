@@ -233,7 +233,15 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(16),
-                  child: Image.network(_imgIngredient, width: 64, height: 64, fit: BoxFit.cover, errorBuilder: (_, __, ___) => _placeholder(64)),
+                  child: Image.network(
+                    (f.thumbImageUrl != null && f.thumbImageUrl!.trim().isNotEmpty)
+                        ? ApiClient.absoluteUrl(f.thumbImageUrl)
+                        : _imgIngredient,
+                    width: 64,
+                    height: 64,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => _placeholder(64),
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
