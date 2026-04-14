@@ -187,7 +187,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
           crossAxisCount: 4,
           mainAxisSpacing: 8,
           crossAxisSpacing: 8,
-          childAspectRatio: 0.9,
+          childAspectRatio: 0.85,
           children: nutrients.map((n) => CardContainer(
             padding: const EdgeInsets.all(8),
             child: Column(
