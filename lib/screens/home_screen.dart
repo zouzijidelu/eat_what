@@ -7,6 +7,7 @@ import 'plan_list_screen.dart';
 import 'plan_detail_screen.dart';
 import 'food_detail_screen.dart';
 import 'recipe_detail_screen.dart';
+import 'recipe_search_screen.dart';
 import '../widgets/card_container.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -174,39 +175,52 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
           const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.9),
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute<void>(builder: (_) => const RecipeSearchScreen()),
+                );
+              },
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: AppColors.slate200.withValues(alpha: 0.7),
-              ),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: AppColors.brand50,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: AppColors.brand500.withValues(alpha: 0.18),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.9),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: AppColors.slate200.withValues(alpha: 0.7),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: AppColors.brand50,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: AppColors.brand500.withValues(alpha: 0.18),
+                        ),
+                      ),
+                      child: const Center(
+                        child: Text('⌕', style: TextStyle(fontSize: 16)),
+                      ),
                     ),
-                  ),
-                  child: const Center(
-                    child: Text('⌕', style: TextStyle(fontSize: 16)),
-                  ),
+                    const SizedBox(width: 8),
+                    const Expanded(
+                      child: Text(
+                        '搜索食谱 / 食物 / 计划',
+                        style: TextStyle(fontSize: 14, color: AppColors.slate500),
+                      ),
+                    ),
+                    Icon(Icons.chevron_right, size: 20, color: AppColors.slate500.withValues(alpha: 0.6)),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    '搜索食谱 / 食物 / 计划',
-                    style: TextStyle(fontSize: 14, color: AppColors.slate500),
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ],

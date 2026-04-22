@@ -176,6 +176,39 @@ class CaipinSummary {
   }
 }
 
+/// GET /sp/index/searchCaipin — 菜谱搜索分页
+class SearchCaipinListPayload {
+  final int total;
+  final int perPage;
+  final int currentPage;
+  final int lastPage;
+  final List<CaipinSummary> list;
+  final bool hasMore;
+
+  const SearchCaipinListPayload({
+    required this.total,
+    required this.perPage,
+    required this.currentPage,
+    required this.lastPage,
+    required this.list,
+    required this.hasMore,
+  });
+
+  factory SearchCaipinListPayload.fromJson(Map<String, dynamic> json) {
+    int _int(dynamic v) => (v is num) ? v.toInt() : int.tryParse('$v') ?? 0;
+    final dataList = (json['data'] as List? ?? const []);
+    final hm = json['has_more'];
+    return SearchCaipinListPayload(
+      total: _int(json['total']),
+      perPage: _int(json['per_page']),
+      currentPage: _int(json['current_page']),
+      lastPage: _int(json['last_page']),
+      list: dataList.map((e) => CaipinSummary.fromJson((e as Map).cast<String, dynamic>())).toList(),
+      hasMore: hm == true || hm == 1,
+    );
+  }
+}
+
 class CaipinFoodItem {
   final num weight;
   final String name;

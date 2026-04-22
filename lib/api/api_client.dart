@@ -100,6 +100,28 @@ class ApiClient {
     return res.data;
   }
 
+  /// GET /sp/index/searchCaipin?page=&limit=&keyword=
+  Future<SearchCaipinListPayload> searchCaipin({
+    int? page,
+    required int limit,
+    String? keyword,
+  }) async {
+    final query = <String, String>{'limit': limit.toString()};
+    if (page != null) {
+      query['page'] = page.toString();
+    }
+    final kw = (keyword ?? '').trim();
+    if (kw.isNotEmpty) {
+      query['keyword'] = kw;
+    }
+    final res = await _getApi<SearchCaipinListPayload>(
+      '/sp/index/searchCaipin',
+      query: query,
+      parseData: (d) => SearchCaipinListPayload.fromJson((d as Map).cast<String, dynamic>()),
+    );
+    return res.data;
+  }
+
   /// GET /sp/index/getCaipinDetail?id=
   Future<CaipinDetailPayload> getCaipinDetail(int id) async {
     final res = await _getApi<CaipinDetailPayload>(
