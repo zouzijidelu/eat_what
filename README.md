@@ -17,7 +17,7 @@
 ```
 index.html (首页)
 ├── recipe-detail.html  ← 食谱推荐轮播
-├── food-list.html      ← 食物推荐「更多」
+├── food-list.html      ← 食材推荐「更多」
 │   └── food-items.html ← 二级分类（通过 ?c=莓果类 等参数）
 │       └── food-detail.html
 └── plan-list.html      ← 饮食计划「更多」
@@ -31,10 +31,10 @@ index.html (首页)
 
 | 页面 | 功能 | 主要布局特点 |
 |------|------|-------------|
-| **index.html** | 首页 | 顶部品牌区 + 搜索 + 食谱轮播 + 食物 4 宫格 + 饮食计划列表 |
-| **food-list.html** | 食物分类 | 左侧一级分类 Tab + 右侧二级分类网格 |
-| **food-items.html** | 二级分类食物列表 | 顶部 + 搜索 + 左图右文列表 |
-| **food-detail.html** | 食物详情 | 左图右文主信息 + 营养素 4 宫格 + 推荐吃法 + 相关菜谱 |
+| **index.html** | 首页 | 顶部品牌区 + 搜索 + 食谱轮播 + 食材 4 宫格 + 饮食计划列表 |
+| **food-list.html** | 食材分类 | 左侧一级分类 Tab + 右侧二级分类网格 |
+| **food-items.html** | 二级分类食材列表 | 顶部 + 搜索 + 左图右文列表 |
+| **food-detail.html** | 食材详情 | 左图右文主信息 + 营养素 4 宫格 + 推荐吃法 + 相关菜谱 |
 | **plan-list.html** | 饮食计划列表 | 左图右文卡片列表 |
 | **plan-detail.html** | 计划详情 | 计划信息 + 天数选择器 + 早/午/晚餐安排 + 计划说明 |
 | **recipe-detail.html** | 菜谱详情 | 基本信息 + 营养素 + 食材清单 + 制作步骤 |
@@ -73,9 +73,9 @@ index.html (首页)
 
 | 用途 | 布局 | 典型用法 |
 |------|------|---------|
-| 左图右文 | `flex gap-3`，左图 16×16～24×24 | 计划卡片、食物/食谱详情 |
-| 上图下文 | `aspect-square` + 下方文字 | 食物推荐 4 宫格 |
-| 4 宫格 | `grid grid-cols-4 gap-2` | 营养素、食物推荐 |
+| 左图右文 | `flex gap-3`，左图 16×16～24×24 | 计划卡片、食材/食谱详情 |
+| 上图下文 | `aspect-square` + 下方文字 | 食材推荐 4 宫格 |
+| 4 宫格 | `grid grid-cols-4 gap-2` | 营养素、食材推荐 |
 | 轮播 | `snap-x-mandatory` + `overflow-x-auto` | 食谱推荐 |
 
 ---

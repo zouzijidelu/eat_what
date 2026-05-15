@@ -1,7 +1,9 @@
 import 'dart:convert';
+
 import 'package:http/http.dart' as http;
 
 import 'api_models.dart';
+import 'api_request_log.dart';
 
 class ApiException implements Exception {
   final String message;
@@ -37,22 +39,39 @@ class ApiClient {
     return '$origin$u';
   }
 
-  Future<Map<String, dynamic>> _getJson(
-    String path, {
-    Map<String, String>? query,
-  }) async {
-    final uri = Uri.parse('$apiBaseUrl$path').replace(queryParameters: query);
-    final resp = await http.get(uri);
+  Future<Map<String, dynamic>> _getJson(Uri uri) async {
+    ApiRequestLog.request('GET', uri);
+    final sw = Stopwatch()..start();
+    try {
+      final resp = await http.get(uri);
+      sw.stop();
+      ApiRequestLog.httpResponse(uri, resp.statusCode, resp.body, duration: sw.elapsed);
 
-    if (resp.statusCode != 200) {
-      throw ApiException('网络请求失败: ${resp.statusCode}', httpStatus: resp.statusCode);
-    }
+      if (resp.statusCode != 200) {
+        ApiRequestLog.httpFailureFooter(uri, resp.statusCode);
+        throw ApiException('网络请求失败: ${resp.statusCode}', httpStatus: resp.statusCode);
+      }
 
-    final dynamic decoded = json.decode(resp.body);
-    if (decoded is! Map<String, dynamic>) {
-      throw const ApiException('返回数据格式错误（非 JSON 对象）');
+      final dynamic decoded;
+      try {
+        decoded = json.decode(resp.body);
+      } on FormatException catch (e, st) {
+        ApiRequestLog.jsonDecodeError(uri, e, st);
+        throw const ApiException('返回数据格式错误（非 JSON）');
+      }
+
+      if (decoded is! Map<String, dynamic>) {
+        ApiRequestLog.wrongJsonRoot(uri, '根节点类型为 ${decoded.runtimeType}，期望 Map');
+        throw const ApiException('返回数据格式错误（非 JSON 对象）');
+      }
+      return decoded;
+    } on ApiException {
+      rethrow;
+    } catch (e, st) {
+      ApiRequestLog.unexpectedError(uri, e, st);
+      ApiRequestLog.httpFailureFooter(uri, 0);
+      throw ApiException('网络异常: $e');
     }
-    return decoded;
   }
 
   Future<ApiResponse<T>> _getApi<T>(
@@ -60,11 +79,20 @@ class ApiClient {
     Map<String, String>? query,
     required T Function(dynamic dataJson) parseData,
   }) async {
-    final jsonMap = await _getJson(path, query: query);
-    final res = ApiResponse<T>.fromJson(jsonMap, parseData: parseData);
+    final uri = Uri.parse('$apiBaseUrl$path').replace(queryParameters: query);
+    final jsonMap = await _getJson(uri);
+    final ApiResponse<T> res;
+    try {
+      res = ApiResponse<T>.fromJson(jsonMap, parseData: parseData);
+    } catch (e, st) {
+      ApiRequestLog.unexpectedError(uri, '解析 data 模型失败: $e', st);
+      rethrow;
+    }
     if (!res.isOk) {
+      ApiRequestLog.apiEnvelope(uri, res.code, res.msg);
       throw ApiException(res.msg.isEmpty ? '接口返回错误' : res.msg, apiCode: res.code);
     }
+    ApiRequestLog.successFooter(uri);
     return res;
   }
 
@@ -143,6 +171,55 @@ class ApiClient {
               .toList();
         }
         return const <FoodCategory>[];
+      },
+    );
+    return res.data;
+  }
+
+  /// GET /sp/index/SearchFoodList?keyword=&rank_id=
+  ///
+  /// `rank_id` 与 [getFoodList] 一致，为 **二级分类**（`FoodSubCategory.rank_id`），
+  /// 勿传一级 `FoodCategory.rank_id`，否则易 500 或无数据。
+  Future<List<FoodListItem>> searchFoodList({
+    String? keyword,
+    int? rankId,
+  }) async {
+    final query = <String, String>{};
+    final kw = (keyword ?? '').trim();
+    if (kw.isNotEmpty) {
+      query['keyword'] = kw;
+    }
+    if (rankId != null) {
+      query['rank_id'] = rankId.toString();
+    }
+    final res = await _getApi<List<FoodListItem>>(
+      '/sp/index/SearchFoodList',
+      query: query.isEmpty ? null : query,
+      parseData: (d) {
+        if (d is List) {
+          return d.map((e) => FoodListItem.fromJson((e as Map).cast<String, dynamic>())).toList();
+        }
+        return const <FoodListItem>[];
+      },
+    );
+    return res.data;
+  }
+
+  /// GET /sp/index/foodSearch?keyword=
+  Future<List<FoodListItem>> foodSearch({String? keyword}) async {
+    final query = <String, String>{};
+    final kw = (keyword ?? '').trim();
+    if (kw.isNotEmpty) {
+      query['keyword'] = kw;
+    }
+    final res = await _getApi<List<FoodListItem>>(
+      '/sp/index/foodSearch',
+      query: query.isEmpty ? null : query,
+      parseData: (d) {
+        if (d is List) {
+          return d.map((e) => FoodListItem.fromJson((e as Map).cast<String, dynamic>())).toList();
+        }
+        return const <FoodListItem>[];
       },
     );
     return res.data;

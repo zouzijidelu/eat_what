@@ -79,24 +79,7 @@ class _FoodItemsScreenState extends State<FoodItemsScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text('共 ${_filtered.length} 个食物', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.slate500)),
-                            GestureDetector(
-                              onTap: () {},
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: AppColors.brand50,
-                                  borderRadius: BorderRadius.circular(999),
-                                  border: Border.all(color: AppColors.brand500.withValues(alpha: 0.18)),
-                                ),
-                                child: Text('示例详情 →', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.brand600)),
-                              ),
-                            ),
-                          ],
-                        ),
+                        Text('共 ${_filtered.length} 个食材', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.slate500)),
                         const SizedBox(height: 12),
                         Expanded(
                           child: _filtered.isEmpty
@@ -111,7 +94,7 @@ class _FoodItemsScreenState extends State<FoodItemsScreen> {
                                   child: Column(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Text('没有找到相关食物', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800)),
+                                      Text('没有找到相关食材', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800)),
                                       Text('换个关键词试试', style: TextStyle(fontSize: 12, color: AppColors.slate500)),
                                     ],
                                   ),
@@ -177,7 +160,7 @@ class _FoodItemsScreenState extends State<FoodItemsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('食物列表', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.slate500)),
+                Text('食材列表', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.slate500)),
                 Text(widget.categoryName, style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w800,
                   letterSpacing: -0.5,
@@ -227,7 +210,7 @@ class _FoodItemsScreenState extends State<FoodItemsScreen> {
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: '搜索本分类食物',
+                hintText: '搜索本分类食材',
                 hintStyle: TextStyle(fontSize: 14, color: AppColors.slate500),
                 border: InputBorder.none,
                 isDense: true,

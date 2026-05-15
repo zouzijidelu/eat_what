@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../api/api_client.dart';
 import '../api/api_models.dart';
+import 'food_detail_screen.dart';
 import 'food_items_screen.dart';
+import 'food_rank_search_screen.dart';
 import '../widgets/card_container.dart';
 
 class FoodListScreen extends StatefulWidget {
@@ -16,9 +20,16 @@ class _FoodListScreenState extends State<FoodListScreen> {
   String _activeId = '';
   List<FoodCategory> _categories = const [];
 
+  final TextEditingController _searchController = TextEditingController();
+  Timer? _searchDebounce;
+  bool _searchLoading = false;
+  List<FoodListItem> _searchResults = const [];
+  String? _searchError;
+
   @override
   void initState() {
     super.initState();
+    _searchController.addListener(_onSearchTextChanged);
     ApiClient.instance.getFoodCateList().then((value) {
       if (!mounted) return;
       setState(() {
@@ -26,6 +37,66 @@ class _FoodListScreenState extends State<FoodListScreen> {
         _activeId = value.isNotEmpty ? value.first.id.toString() : '';
       });
     });
+  }
+
+  void _onSearchTextChanged() {
+    _searchDebounce?.cancel();
+    final kw = _searchController.text.trim();
+    if (kw.isEmpty) {
+      setState(() {
+        _searchLoading = false;
+        _searchResults = const [];
+        _searchError = null;
+      });
+      return;
+    }
+    setState(() {
+      _searchLoading = true;
+      _searchError = null;
+      _searchResults = const [];
+    });
+    _searchDebounce = Timer(const Duration(milliseconds: 400), () => _runFoodSearch(kw));
+  }
+
+  Future<void> _runFoodSearch(String keyword) async {
+    setState(() {
+      _searchLoading = true;
+      _searchError = null;
+      _searchResults = const [];
+    });
+    try {
+      final list = await ApiClient.instance.foodSearch(keyword: keyword);
+      if (!mounted) return;
+      if (_searchController.text.trim() != keyword) return;
+      setState(() {
+        _searchResults = list;
+        _searchLoading = false;
+        _searchError = null;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      if (_searchController.text.trim() != keyword) return;
+      setState(() {
+        _searchLoading = false;
+        _searchError = e.toString();
+        _searchResults = const [];
+      });
+    }
+  }
+
+  void _clearSearch() {
+    _searchDebounce?.cancel();
+    _searchController.clear();
+  }
+
+  bool get _showSearchPanel => _searchController.text.trim().isNotEmpty;
+
+  @override
+  void dispose() {
+    _searchDebounce?.cancel();
+    _searchController.removeListener(_onSearchTextChanged);
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
@@ -38,18 +109,16 @@ class _FoodListScreenState extends State<FoodListScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildHeader(),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                child: _buildSearchBar(),
+              ),
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: CardContainer(
                     padding: EdgeInsets.zero,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        _buildTabs(),
-                        Expanded(child: _buildSecondaryGrid()),
-                      ],
-                    ),
+                    child: _showSearchPanel ? _buildSearchPanel() : _buildCategoryPanel(),
                   ),
                 ),
               ),
@@ -80,12 +149,157 @@ class _FoodListScreenState extends State<FoodListScreen> {
             ),
           ),
           const SizedBox(width: 12),
-          Text('食物分类', style: Theme.of(context).textTheme.titleMedium?.copyWith(
+          Text('食材分类', style: Theme.of(context).textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w800,
             letterSpacing: -0.5,
           )),
         ],
       ),
+    );
+  }
+
+  Widget _buildSearchBar() {
+    return AnimatedBuilder(
+      animation: _searchController,
+      builder: (context, _) {
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.9),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.slate200.withValues(alpha: 0.7)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: AppColors.brand50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.brand500.withValues(alpha: 0.18)),
+                ),
+                child: const Center(child: Text('⌕', style: TextStyle(fontSize: 16))),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: TextField(
+                  controller: _searchController,
+                  textInputAction: TextInputAction.search,
+                  decoration: InputDecoration(
+                    hintText: '搜索全库食材',
+                    hintStyle: TextStyle(fontSize: 14, color: AppColors.slate500),
+                    border: InputBorder.none,
+                    isDense: true,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+              ),
+              if (_searchController.text.isNotEmpty)
+                IconButton(
+                  onPressed: _clearSearch,
+                  icon: Icon(Icons.close, size: 20, color: AppColors.slate500),
+                  visualDensity: VisualDensity.compact,
+                  tooltip: '清空',
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildCategoryPanel() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _buildTabs(),
+        Expanded(child: _buildSecondaryGrid()),
+      ],
+    );
+  }
+
+  Widget _buildSearchPanel() {
+    return Padding(
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '搜索结果',
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
+          ),
+          Text(
+            _searchLoading ? '正在搜索…' : '共 ${_searchResults.length} 条',
+            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.slate500),
+          ),
+          const SizedBox(height: 10),
+          Expanded(child: _buildSearchBody()),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSearchBody() {
+    if (_searchError != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(_searchError!, textAlign: TextAlign.center, style: TextStyle(fontSize: 13, color: AppColors.slate600)),
+              const SizedBox(height: 12),
+              FilledButton.tonal(
+                onPressed: () => _runFoodSearch(_searchController.text.trim()),
+                child: const Text('重试'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    if (_searchLoading && _searchResults.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (!_searchLoading && _searchResults.isEmpty) {
+      return Center(
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: AppColors.rose50.withValues(alpha: 0.4),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: AppColors.rose100.withValues(alpha: 0.7)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('没有找到相关食材', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800)),
+              Text('换个关键词试试', style: TextStyle(fontSize: 12, color: AppColors.slate500)),
+            ],
+          ),
+        ),
+      );
+    }
+    return ListView.separated(
+      itemCount: _searchResults.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 8),
+      itemBuilder: (_, i) {
+        final item = _searchResults[i];
+        return _IngredientSearchRow(
+          item: item,
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => FoodDetailScreen(
+                foodId: item.id,
+                name: item.name,
+                thumbImageUrl: item.thumbImageUrl,
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -145,25 +359,41 @@ class _FoodListScreenState extends State<FoodListScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(category.name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800)),
-                  Text('选择左侧分类查看二级分类', style: TextStyle(fontSize: 11, color: AppColors.slate500)),
-                ],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(category.name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800)),
+                    Text('选择左侧分类查看二级分类', style: TextStyle(fontSize: 11, color: AppColors.slate500)),
+                  ],
+                ),
               ),
-              GestureDetector(
-                onTap: () {},
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: AppColors.brand50,
-                    borderRadius: BorderRadius.circular(999),
-                    border: Border.all(color: AppColors.brand500.withValues(alpha: 0.18)),
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute<void>(
+                        builder: (_) => FoodRankSearchScreen(
+                          subRankIds: category.subs.map((s) => s.rankId).toList(),
+                          categoryName: category.name,
+                        ),
+                      ),
+                    );
+                  },
+                  borderRadius: BorderRadius.circular(999),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.brand50,
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(color: AppColors.brand500.withValues(alpha: 0.18)),
+                    ),
+                    child: Text('更多->', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.brand600)),
                   ),
-                  child: Text('示例详情 →', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.brand600)),
                 ),
               ),
             ],
@@ -240,4 +470,71 @@ class _SubCategoryItem extends StatelessWidget {
   }
 
   Widget _placeholder() => Container(color: AppColors.slate200, child: const Icon(Icons.image_not_supported, size: 24));
+}
+
+class _IngredientSearchRow extends StatelessWidget {
+  final FoodListItem item;
+  final VoidCallback onTap;
+
+  const _IngredientSearchRow({required this.item, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final tag = (item.healthLabel ?? item.suggest ?? '').toString();
+    final kcal = item.calory == null ? '—' : '${item.calory}kcal';
+    final imageUrl = ApiClient.absoluteUrl(item.thumbImageUrl);
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(24),
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [BoxShadow(color: AppColors.ink.withValues(alpha: 0.06), blurRadius: 4)],
+            border: Border.all(color: AppColors.rose100.withValues(alpha: 0.7)),
+          ),
+          child: Row(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Image.network(imageUrl, width: 56, height: 56, fit: BoxFit.cover, errorBuilder: (_, __, ___) => _imgPlaceholder()),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(item.name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        ),
+                        if (tag.isNotEmpty)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: AppColors.brand50,
+                              borderRadius: BorderRadius.circular(999),
+                              border: Border.all(color: AppColors.brand500.withValues(alpha: 0.18)),
+                            ),
+                            child: Text(tag, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.brand600)),
+                          ),
+                      ],
+                    ),
+                    Text(kcal, style: TextStyle(fontSize: 12, color: AppColors.slate600), maxLines: 2, overflow: TextOverflow.ellipsis),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _imgPlaceholder() => Container(width: 56, height: 56, color: AppColors.slate200, child: const Icon(Icons.image_not_supported, size: 24));
 }

@@ -16,7 +16,7 @@ class FoodDetailScreen extends StatelessWidget {
     this.thumbImageUrl,
   });
 
-  static const _imgFood = 'https://placehold.co/240x240/png?text=%E9%A3%9F%E7%89%A9';
+  static const _imgFood = 'https://placehold.co/240x240/png?text=%E9%A3%9F%E6%9D%90';
   static const _imgRecipe = 'https://placehold.co/200x200/png?text=%E8%8F%9C%E8%B0%B1';
 
   @override

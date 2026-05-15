@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>食物分类 - 吃啥</title>
+    <title>食材分类 - 吃啥</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -57,7 +57,7 @@
           <span class="text-lg leading-none">‹</span>
         </a>
         <div class="min-w-0">
-          <h1 class="truncate text-[18px] font-extrabold tracking-tight">食物分类</h1>
+          <h1 class="truncate text-[18px] font-extrabold tracking-tight">食材分类</h1>
         </div>
       </header>
 
@@ -81,7 +81,7 @@
               <a
                 href="./food-detail.html"
                 class="shrink-0 rounded-full bg-brand-50 px-2 py-1 text-[11px] font-semibold text-brand-600 soft-ring"
-                aria-label="去食物详情示例"
+                aria-label="去食材详情示例"
                 >示例详情 →</a
               >
             </div>
@@ -187,7 +187,7 @@
           gridEl.innerHTML = items
             .map(
               (i) => `
-              <a href="./food-items.html?c=${encodeURIComponent(i.name)}" class="group rounded-[22px] bg-white p-2 shadow-sm ring-1 ring-rose-100/70 active:scale-[0.995]" aria-label="进入${i.name}食物列表">
+              <a href="./food-items.html?c=${encodeURIComponent(i.name)}" class="group rounded-[22px] bg-white p-2 shadow-sm ring-1 ring-rose-100/70 active:scale-[0.995]" aria-label="进入${i.name}食材列表">
                 <img class="aspect-square w-full rounded-2xl object-cover ring-1 ring-rose-100/70" src="${i.img}" alt="${i.name} 图片" loading="lazy" />
                 <div class="mt-1.5">
                   <p class="truncate text-[11px] font-extrabold">${i.name}</p>

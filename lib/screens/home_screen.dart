@@ -213,7 +213,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(width: 8),
                     const Expanded(
                       child: Text(
-                        '搜索食谱 / 食物 / 计划',
+                        '搜索食谱 / 食材 / 计划',
                         style: TextStyle(fontSize: 14, color: AppColors.slate500),
                       ),
                     ),

@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>食物列表 - 吃啥</title>
+    <title>食材列表 - 吃啥</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -50,7 +50,7 @@
           <span class="text-lg leading-none">‹</span>
         </a>
         <div class="min-w-0 flex-1">
-          <p class="text-xs font-semibold text-slate-500">食物列表</p>
+          <p class="text-xs font-semibold text-slate-500">食材列表</p>
           <h1 id="pageTitle" class="truncate text-[18px] font-extrabold tracking-tight">—</h1>
         </div>
         <a
@@ -68,8 +68,8 @@
           <input
             id="searchInput"
             class="h-9 w-full bg-transparent pr-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none"
-            placeholder="搜索本分类食物"
-            aria-label="搜索食物"
+            placeholder="搜索本分类食材"
+            aria-label="搜索食材"
           />
         </div>
       </section>
@@ -82,7 +82,7 @@
             <a
               href="./food-detail.html"
               class="rounded-full bg-brand-50 px-2 py-1 text-[11px] font-semibold text-brand-600 soft-ring"
-              aria-label="打开食物详情示例"
+              aria-label="打开食材详情示例"
               >示例详情 →</a
             >
           </div>
@@ -92,14 +92,14 @@
           </div>
 
           <div id="emptyState" class="hidden rounded-3xl bg-rose-50/40 p-6 text-center ring-1 ring-rose-100/70">
-            <p class="text-sm font-extrabold">没有找到相关食物</p>
+            <p class="text-sm font-extrabold">没有找到相关食材</p>
             <p class="mt-1 text-xs text-slate-500">换个关键词试试</p>
           </div>
         </div>
       </section>
 
       <footer class="mt-6 text-center text-xs text-slate-400">
-        <p>列表为占位数据；可替换为真实食物库</p>
+        <p>列表为占位数据；可替换为真实食材库</p>
       </footer>
     </div>
 
@@ -214,16 +214,16 @@
         };
 
         const all = db[category] || [
-          { name: "示例食物 A", tag: "占位", kcal: "—" },
-          { name: "示例食物 B", tag: "占位", kcal: "—" },
-          { name: "示例食物 C", tag: "占位", kcal: "—" },
+          { name: "示例食材 A", tag: "占位", kcal: "—" },
+          { name: "示例食材 B", tag: "占位", kcal: "—" },
+          { name: "示例食材 C", tag: "占位", kcal: "—" },
         ];
 
         const imgFor = (name) => `https://placehold.co/200x200/png?text=${encodeURIComponent(name)}`;
 
         const render = (items) => {
           if (!listEl || !metaEl || !emptyEl) return;
-          metaEl.textContent = `共 ${items.length} 个食物`;
+          metaEl.textContent = `共 ${items.length} 个食材`;
           emptyEl.classList.toggle("hidden", items.length !== 0);
           listEl.classList.toggle("hidden", items.length === 0);
           listEl.innerHTML = items
