@@ -3,6 +3,7 @@ import '../theme/app_colors.dart';
 import '../api/api_client.dart';
 import '../api/api_models.dart';
 import '../widgets/card_container.dart';
+import 'recipe_detail_screen.dart';
 
 class FoodDetailScreen extends StatelessWidget {
   final int foodId;
@@ -17,12 +18,18 @@ class FoodDetailScreen extends StatelessWidget {
   });
 
   static const _imgFood = 'https://placehold.co/240x240/png?text=%E9%A3%9F%E6%9D%90';
-  static const _imgRecipe = 'https://placehold.co/200x200/png?text=%E8%8F%9C%E8%B0%B1';
 
   @override
   Widget build(BuildContext context) {
+    final future = Future.wait([
+      ApiClient.instance.getFoodNutritionDetail(foodId: foodId),
+      ApiClient.instance.getFoodCaipin(foodId: foodId),
+    ]);
+
     return Scaffold(
       body: Container(
+        width: double.infinity,
+        height: double.infinity,
         decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
         child: SafeArea(
           child: SingleChildScrollView(
@@ -33,23 +40,36 @@ class FoodDetailScreen extends StatelessWidget {
                 children: [
                   _buildHeader(context),
                   const SizedBox(height: 16),
-                  _buildInfoCard(context),
-                  const SizedBox(height: 16),
-                  FutureBuilder<List<FoodNutritionItem>>(
-                    future: ApiClient.instance.getFoodNutritionDetail(foodId: foodId),
+                  FutureBuilder<List<dynamic>>(
+                    future: future,
                     builder: (context, snapshot) {
-                      final items = snapshot.data ?? const <FoodNutritionItem>[];
-                      return _buildNutrients(
-                        context,
-                        items: items,
-                        hasError: snapshot.hasError,
+                      if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
+                        return const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(48),
+                            child: CircularProgressIndicator(),
+                          ),
+                        );
+                      }
+
+                      final nutrients = (snapshot.data?[0] as List<FoodNutritionItem>?) ?? const <FoodNutritionItem>[];
+                      final caipinList = (snapshot.data?[1] as List<CaipinSummary>?) ?? const <CaipinSummary>[];
+                      final hasError = snapshot.hasError;
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildInfoCard(context, nutrients: nutrients),
+                          const SizedBox(height: 16),
+                          _buildNutrients(context, items: nutrients, hasError: hasError),
+                          const SizedBox(height: 24),
+                          _buildRecommendedWays(context, caipinList: caipinList),
+                          const SizedBox(height: 24),
+                          _buildRelatedRecipes(context, caipinList: caipinList),
+                        ],
                       );
                     },
                   ),
-                  const SizedBox(height: 24),
-                  _buildRecommendedWays(context),
-                  const SizedBox(height: 24),
-                  _buildRelatedRecipes(context),
                   const SizedBox(height: 32),
                 ],
               ),
@@ -86,8 +106,10 @@ class FoodDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoCard(BuildContext context) {
+  Widget _buildInfoCard(BuildContext context, {required List<FoodNutritionItem> nutrients}) {
     final imageUrl = ApiClient.absoluteUrl(thumbImageUrl);
+    final tags = nutrients.take(3).toList();
+
     return CardContainer(
       child: Row(
         children: [
@@ -105,16 +127,13 @@ class FoodDetailScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 4,
-                  children: [
-                    _tag('优质脂肪', brand: true),
-                    _tag('百搭'),
-                    _tag('饱腹'),
-                  ],
-                ),
-                const SizedBox(height: 8),
+                if (tags.isNotEmpty)
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
+                    children: List.generate(tags.length, (i) => _tag(tags[i].name, brand: i == 0)),
+                  ),
+                if (tags.isNotEmpty) const SizedBox(height: 8),
                 Text(name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
                 const SizedBox(height: 4),
                 Text('口感细腻像黄油，适合做沙拉、吐司或奶昔。占位文案可替换。', style: TextStyle(fontSize: 14, color: AppColors.slate600), maxLines: 2, overflow: TextOverflow.ellipsis),
@@ -193,38 +212,79 @@ class FoodDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildRecommendedWays(BuildContext context) {
+  Widget _buildRecommendedWays(BuildContext context, {required List<CaipinSummary> caipinList}) {
+    final ways = caipinList.take(2).toList();
+    if (ways.isEmpty) {
+      return const SizedBox.shrink();
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('推荐吃法', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
         const SizedBox(height: 12),
-        _WayCard(title: '牛油果吐司', desc: '压泥抹面包，撒黑胡椒和少许盐，再配一个溏心蛋更满足。'),
-        const SizedBox(height: 12),
-        _WayCard(title: '清爽沙拉', desc: '与生菜、番茄、鸡胸肉搭配，淋柠檬汁或油醋汁即可。'),
+        ...ways.map((caipin) => Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: _WayCard(
+            title: caipin.name,
+            desc: caipin.desc,
+            imageUrl: caipin.image,
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => RecipeDetailScreen(
+                  caipinId: caipin.id,
+                  fallbackTitle: caipin.name,
+                  fallbackDesc: caipin.desc,
+                  fallbackImageUrl: caipin.image,
+                ),
+              ),
+            ),
+          ),
+        )),
       ],
     );
   }
 
-  Widget _buildRelatedRecipes(BuildContext context) {
-    // 当前接口未提供「相关菜谱」列表接口，因此先做占位。
+  Widget _buildRelatedRecipes(BuildContext context, {required List<CaipinSummary> caipinList}) {
+    final recipes = caipinList.length > 2 ? caipinList.sublist(2) : <CaipinSummary>[];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('相关菜谱', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+        Text('相关食谱', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
         const SizedBox(height: 12),
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: AppColors.rose50.withValues(alpha: 0.25),
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: AppColors.rose100.withValues(alpha: 0.7)),
-          ),
-          child: Text(
-            '暂无相关菜谱数据',
-            style: TextStyle(fontSize: 12, color: AppColors.slate600),
-          ),
-        ),
+        if (recipes.isEmpty)
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.rose50.withValues(alpha: 0.25),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: AppColors.rose100.withValues(alpha: 0.7)),
+            ),
+            child: Text(
+              '暂无相关菜谱数据',
+              style: TextStyle(fontSize: 12, color: AppColors.slate600),
+            ),
+          )
+        else
+          ...recipes.map((caipin) => Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: _WayCard(
+              title: caipin.name,
+              desc: caipin.desc,
+              imageUrl: caipin.image,
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => RecipeDetailScreen(
+                    caipinId: caipin.id,
+                    fallbackTitle: caipin.name,
+                    fallbackDesc: caipin.desc,
+                    fallbackImageUrl: caipin.image,
+                  ),
+                ),
+              ),
+            ),
+          )),
       ],
     );
   }
@@ -269,29 +329,35 @@ class _NutrientCell extends StatelessWidget {
 class _WayCard extends StatelessWidget {
   final String title;
   final String desc;
+  final String imageUrl;
+  final VoidCallback? onTap;
 
-  const _WayCard({required this.title, required this.desc});
+  const _WayCard({required this.title, required this.desc, required this.imageUrl, this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return CardContainer(
-      child: Row(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: Image.network('https://placehold.co/200x200/png?text=%E5%90%83%E6%B3%95', width: 64, height: 64, fit: BoxFit.cover, errorBuilder: (_, __, ___) => _placeholder()),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800)),
-                Text(desc, style: TextStyle(fontSize: 12, color: AppColors.slate600), maxLines: 2, overflow: TextOverflow.ellipsis),
-              ],
+    final image = ApiClient.absoluteUrl(imageUrl);
+    return GestureDetector(
+      onTap: onTap,
+      child: CardContainer(
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Image.network(image, width: 64, height: 64, fit: BoxFit.cover, errorBuilder: (_, __, ___) => _placeholder()),
             ),
-          ),
-        ],
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800)),
+                  Text(desc, style: TextStyle(fontSize: 12, color: AppColors.slate600), maxLines: 2, overflow: TextOverflow.ellipsis),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

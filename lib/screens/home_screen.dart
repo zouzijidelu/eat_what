@@ -141,28 +141,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                 letterSpacing: -0.5,
                               ),
                         ),
-                        const Spacer(),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.brand50,
-                            borderRadius: BorderRadius.circular(999),
-                            border: Border.all(
-                              color: AppColors.brand500.withValues(alpha: 0.18),
-                            ),
-                          ),
-                          child: Text(
-                            '今日推荐',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.brand600,
-                            ),
-                          ),
-                        ),
                       ],
                     ),
                     Text(

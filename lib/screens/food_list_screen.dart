@@ -6,7 +6,6 @@ import '../api/api_client.dart';
 import '../api/api_models.dart';
 import 'food_detail_screen.dart';
 import 'food_items_screen.dart';
-import 'food_rank_search_screen.dart';
 import '../widgets/card_container.dart';
 
 class FoodListScreen extends StatefulWidget {
@@ -352,50 +351,23 @@ class _FoodListScreenState extends State<FoodListScreen> {
     if (_categories.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
-    final category = _categories.firstWhere((c) => c.id.toString() == _activeId, orElse: () => _categories.first);
+    final category = _categories.cast<FoodCategory?>().firstWhere(
+      (c) => c!.id.toString() == _activeId,
+      orElse: () => _categories.isNotEmpty ? _categories.first : null,
+    );
+    if (category == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
     return Padding(
       padding: const EdgeInsets.all(12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(category.name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800)),
-                    Text('选择左侧分类查看二级分类', style: TextStyle(fontSize: 11, color: AppColors.slate500)),
-                  ],
-                ),
-              ),
-              Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute<void>(
-                        builder: (_) => FoodRankSearchScreen(
-                          subRankIds: category.subs.map((s) => s.rankId).toList(),
-                          categoryName: category.name,
-                        ),
-                      ),
-                    );
-                  },
-                  borderRadius: BorderRadius.circular(999),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppColors.brand50,
-                      borderRadius: BorderRadius.circular(999),
-                      border: Border.all(color: AppColors.brand500.withValues(alpha: 0.18)),
-                    ),
-                    child: Text('更多->', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.brand600)),
-                  ),
-                ),
-              ),
+              Text(category.name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800)),
+              Text('选择左侧分类查看二级分类', style: TextStyle(fontSize: 11, color: AppColors.slate500)),
             ],
           ),
           const SizedBox(height: 12),
@@ -460,7 +432,6 @@ class _SubCategoryItem extends StatelessWidget {
                 ),
               ),
             ),
-            // const SizedBox(height: 30),
             Text(name, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800), maxLines: 1, overflow: TextOverflow.ellipsis),
             Text(desc, style: TextStyle(fontSize: 10, color: AppColors.slate500, height: 1.2), maxLines: 2, overflow: TextOverflow.ellipsis),
           ],

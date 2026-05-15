@@ -176,35 +176,6 @@ class ApiClient {
     return res.data;
   }
 
-  /// GET /sp/index/SearchFoodList?keyword=&rank_id=
-  ///
-  /// `rank_id` 与 [getFoodList] 一致，为 **二级分类**（`FoodSubCategory.rank_id`），
-  /// 勿传一级 `FoodCategory.rank_id`，否则易 500 或无数据。
-  Future<List<FoodListItem>> searchFoodList({
-    String? keyword,
-    int? rankId,
-  }) async {
-    final query = <String, String>{};
-    final kw = (keyword ?? '').trim();
-    if (kw.isNotEmpty) {
-      query['keyword'] = kw;
-    }
-    if (rankId != null) {
-      query['rank_id'] = rankId.toString();
-    }
-    final res = await _getApi<List<FoodListItem>>(
-      '/sp/index/SearchFoodList',
-      query: query.isEmpty ? null : query,
-      parseData: (d) {
-        if (d is List) {
-          return d.map((e) => FoodListItem.fromJson((e as Map).cast<String, dynamic>())).toList();
-        }
-        return const <FoodListItem>[];
-      },
-    );
-    return res.data;
-  }
-
   /// GET /sp/index/foodSearch?keyword=
   Future<List<FoodListItem>> foodSearch({String? keyword}) async {
     final query = <String, String>{};
@@ -252,6 +223,23 @@ class ApiClient {
           return d.map((e) => FoodNutritionItem.fromJson((e as Map).cast<String, dynamic>())).toList();
         }
         return const <FoodNutritionItem>[];
+      },
+    );
+    return res.data;
+  }
+
+  /// GET /sp/index/foodCaipin?food_id=
+  Future<List<CaipinSummary>> getFoodCaipin({required int foodId}) async {
+    final res = await _getApi<List<CaipinSummary>>(
+      '/sp/index/foodCaipin',
+      query: {'food_id': foodId.toString()},
+      parseData: (d) {
+        if (d is List) {
+          return d
+              .map((e) => CaipinSummary.fromJson((e as Map).cast<String, dynamic>()))
+              .toList();
+        }
+        return const <CaipinSummary>[];
       },
     );
     return res.data;

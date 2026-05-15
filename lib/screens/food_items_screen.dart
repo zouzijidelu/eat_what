@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../api/api_client.dart';
@@ -20,11 +21,13 @@ class _FoodItemsScreenState extends State<FoodItemsScreen> {
   List<FoodListItem> _items = [];
   List<FoodListItem> _filtered = [];
   bool _loading = true;
+  bool _searching = false;
+  Timer? _debounceTimer;
 
   @override
   void initState() {
     super.initState();
-    _searchController.addListener(_onSearch);
+    _searchController.addListener(_onSearchChanged);
     ApiClient.instance.getFoodList(rankId: widget.rankId).then((value) {
       if (!mounted) return;
       setState(() {
@@ -42,16 +45,44 @@ class _FoodItemsScreenState extends State<FoodItemsScreen> {
     });
   }
 
-  void _onSearch() {
-    final q = _searchController.text.trim().toLowerCase();
+  void _onSearchChanged() {
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 400), _performSearch);
+  }
+
+  Future<void> _performSearch() async {
+    final q = _searchController.text.trim();
+    if (q.isEmpty) {
+      setState(() {
+        _filtered = _items;
+      });
+      return;
+    }
+
     setState(() {
-      _filtered = q.isEmpty ? _items : _items.where((x) => x.name.toLowerCase().contains(q)).toList();
+      _searching = true;
     });
+
+    try {
+      final results = await ApiClient.instance.foodSearch(keyword: q);
+      if (!mounted) return;
+      setState(() {
+        _filtered = results;
+        _searching = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _searching = false;
+        _filtered = const [];
+      });
+    }
   }
 
   @override
   void dispose() {
-    _searchController.removeListener(_onSearch);
+    _searchController.removeListener(_onSearchChanged);
+    _debounceTimer?.cancel();
     _searchController.dispose();
     super.dispose();
   }
@@ -79,50 +110,76 @@ class _FoodItemsScreenState extends State<FoodItemsScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('共 ${_filtered.length} 个食材', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.slate500)),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                '共 ${_filtered.length} 个食材',
+                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.slate500),
+                              ),
+                            ),
+                            if (_searching)
+                              SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.brand500),
+                              ),
+                          ],
+                        ),
                         const SizedBox(height: 12),
                         Expanded(
-                          child: _filtered.isEmpty
-                            ? Center(
-                                child: Container(
-                                  padding: const EdgeInsets.all(24),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.rose50.withValues(alpha: 0.4),
-                                    borderRadius: BorderRadius.circular(24),
-                                    border: Border.all(color: AppColors.rose100.withValues(alpha: 0.7)),
-                                  ),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text('没有找到相关食材', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800)),
-                                      Text('换个关键词试试', style: TextStyle(fontSize: 12, color: AppColors.slate500)),
-                                    ],
-                                  ),
+                          child: _searching
+                            ? const Center(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    CircularProgressIndicator(color: AppColors.brand500),
+                                    SizedBox(height: 12),
+                                    Text('搜索中...', style: TextStyle(fontSize: 12, color: AppColors.slate500)),
+                                  ],
                                 ),
                               )
-                            : ListView.separated(
-                                itemCount: _filtered.length,
-                                separatorBuilder: (_, __) => const SizedBox(height: 8),
-                                itemBuilder: (_, i) {
-                                  final item = _filtered[i];
-                                  return _FoodListItem(
-                                    name: item.name,
-                                    tag: (item.healthLabel ?? item.suggest ?? '').toString(),
-                                    kcal: item.calory == null ? '—' : '${item.calory}kcal',
-                                    imageUrl: ApiClient.absoluteUrl(item.thumbImageUrl),
-                                    onTap: () => Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => FoodDetailScreen(
-                                          foodId: item.id,
-                                          name: item.name,
-                                          thumbImageUrl: item.thumbImageUrl,
+                            : _filtered.isEmpty
+                              ? Center(
+                                  child: Container(
+                                    padding: const EdgeInsets.all(24),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.rose50.withValues(alpha: 0.4),
+                                      borderRadius: BorderRadius.circular(24),
+                                      border: Border.all(color: AppColors.rose100.withValues(alpha: 0.7)),
+                                    ),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text('没有找到相关食材', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800)),
+                                        Text('换个关键词试试', style: TextStyle(fontSize: 12, color: AppColors.slate500)),
+                                      ],
+                                    ),
+                                  ),
+                                )
+                              : ListView.separated(
+                                  itemCount: _filtered.length,
+                                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                                  itemBuilder: (_, i) {
+                                    final item = _filtered[i];
+                                    return _FoodListItem(
+                                      name: item.name,
+                                      tag: (item.healthLabel ?? item.suggest ?? '').toString(),
+                                      kcal: item.calory == null ? '—' : '${item.calory}kcal',
+                                      imageUrl: ApiClient.absoluteUrl(item.thumbImageUrl),
+                                      onTap: () => Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => FoodDetailScreen(
+                                            foodId: item.id,
+                                            name: item.name,
+                                            thumbImageUrl: item.thumbImageUrl,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  );
-                                },
-                              ),
+                                    );
+                                  },
+                                ),
                         ),
                       ],
                     ),
