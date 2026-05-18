@@ -166,7 +166,7 @@ class FoodDetailScreen extends StatelessWidget {
         children: [
           Text('营养素', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
           const SizedBox(height: 12),
-          Text('营养素加载失败', style: TextStyle(fontSize: 12, color: AppColors.slate600)),
+          Text('营养素加载失败', style: TextStyle(fontSize: 14, color: AppColors.slate600)),
         ],
       );
     }
@@ -177,36 +177,34 @@ class FoodDetailScreen extends StatelessWidget {
         children: [
           Text('营养素', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
           const SizedBox(height: 12),
-          Text('暂无营养素数据', style: TextStyle(fontSize: 12, color: AppColors.slate600)),
+          Text('暂无营养素数据', style: TextStyle(fontSize: 14, color: AppColors.slate600)),
         ],
       );
     }
 
-    final cells = items.take(8).toList();
+    final weigh = items.first.weigh;
+    final displayItems = items.length <= 8 ? items : items.sublist(0, 8);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('营养素', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
-        Text('每 ${items.first.weigh}g 含量（接口单位）', style: TextStyle(fontSize: 12, color: AppColors.slate500)),
+        Row(
+          children: [
+            Text('营养素', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+            const SizedBox(width: 8),
+            Text('(${weigh}g)', style: TextStyle(fontSize: 12, color: AppColors.slate500)),
+          ],
+        ),
         const SizedBox(height: 12),
-        GridView.count(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          crossAxisCount: 4,
-          mainAxisSpacing: 8,
-          crossAxisSpacing: 8,
-          childAspectRatio: 0.9,
-          children: cells
-              .map(
-                (n) => _NutrientCell(
-                  icon: '•',
-                  label: n.name,
-                  value: '${n.value}${n.unit}',
-                  brand: false,
-                ),
-              )
-              .toList(),
+        SizedBox(
+          height: 108,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            itemCount: displayItems.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 10),
+            itemBuilder: (_, i) => _buildNutrientCard(displayItems[i]),
+          ),
         ),
       ],
     );
@@ -289,41 +287,72 @@ class FoodDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _placeholder(double size) => Container(width: size, height: size, color: AppColors.slate200, child: const Icon(Icons.image_not_supported));
-}
-
-class _NutrientCell extends StatelessWidget {
-  final String icon;
-  final String label;
-  final String value;
-  final bool brand;
-
-  const _NutrientCell({required this.icon, required this.label, required this.value, this.brand = false});
-
-  @override
-  Widget build(BuildContext context) {
-    return CardContainer(
-      padding: const EdgeInsets.all(8),
+  Widget _buildNutrientCard(FoodNutritionItem item) {
+    final hasNrv = (item.nrv ?? '').trim().isNotEmpty;
+    return Container(
+      width: 80,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.rose100.withValues(alpha: 0.5)),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.ink.withValues(alpha: 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: brand ? AppColors.brand50 : AppColors.slate50,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: brand ? AppColors.brand500.withValues(alpha: 0.18) : AppColors.slate200.withValues(alpha: 0.7)),
-            ),
-            child: Center(child: Text(icon, style: const TextStyle(fontSize: 18))),
+          Text(
+            item.name,
+            style: TextStyle(fontSize: 11, color: AppColors.slate500),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 4),
-          Text(label, style: TextStyle(fontSize: 10, color: AppColors.slate500)),
-          Text(value, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.slate800)),
+          Text(
+            item.value,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, height: 1),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 2),
+          Text(
+            item.unit,
+            style: TextStyle(fontSize: 11, color: AppColors.slate600),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+          ),
+          if (hasNrv) ...[
+            const SizedBox(height: 4),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+              decoration: BoxDecoration(
+                color: AppColors.brand50,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                'NRV ${item.nrv}',
+                style: TextStyle(fontSize: 9, fontWeight: FontWeight.w600, color: AppColors.brand600),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
         ],
       ),
     );
   }
+
+  Widget _placeholder(double size) => Container(width: size, height: size, color: AppColors.slate200, child: const Icon(Icons.image_not_supported));
 }
 
 class _WayCard extends StatelessWidget {

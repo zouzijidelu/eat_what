@@ -19,6 +19,15 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
   int _activeDay = 1;
   Future<DietPlanDetailPayload>? _futureDetail;
 
+  final _mealTypeLabels = {
+    1: _MealTypeInfo(icon: '早', title: '早餐', subtitle: '清爽开局'),
+    2: _MealTypeInfo(icon: '早加', title: '早加餐', subtitle: '补充能量'),
+    3: _MealTypeInfo(icon: '午', title: '午餐', subtitle: '稳稳饱腹'),
+    4: _MealTypeInfo(icon: '午加', title: '午加餐', subtitle: '午后小憩'),
+    5: _MealTypeInfo(icon: '晚', title: '晚餐', subtitle: '轻一点'),
+    6: _MealTypeInfo(icon: '晚加', title: '晚加餐', subtitle: '睡前轻食'),
+  };
+
   @override
   void initState() {
     super.initState();
@@ -34,49 +43,13 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
     _load();
   }
 
-  _DietMeal? _mealForType(DietPlanDetailPayload? payload, int type) {
-    if (payload == null) return null;
-    final items = payload.planDays
+  List<DietPlanDetailItem> _itemsForType(DietPlanDetailPayload? payload, int type) {
+    if (payload == null) return [];
+    return payload.planDays
         .where((g) => g.type == type)
         .expand((g) => g.detail)
         .toList();
-
-    if (items.isEmpty) return null;
-
-    final first = items.first;
-    final title = items.map((e) => e.sourceName).firstWhere((e) => e.isNotEmpty, orElse: () => '—');
-    final desc = items.map((e) => e.sourceName).where((e) => e.isNotEmpty).join(' + ');
-
-    VoidCallback? action;
-    if (first.sourceType == 'recipe') {
-      action = () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => RecipeDetailScreen(
-                caipinId: first.sourceId,
-                fallbackTitle: title,
-                fallbackDesc: '',
-                fallbackImageUrl: '',
-              ),
-            ),
-          );
-    } else if (first.sourceType == 'food') {
-      action = () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => FoodDetailScreen(
-                foodId: first.sourceId,
-                name: title,
-                thumbImageUrl: null,
-              ),
-            ),
-          );
-    }
-
-    return _DietMeal(title: title, desc: desc, action: action);
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -87,44 +60,39 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
           child: SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-              child: FutureBuilder<DietPlanDetailPayload>(
-                future: _futureDetail,
-                builder: (context, snapshot) {
-                  final payload = snapshot.data;
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildHeader(),
+                  const SizedBox(height: 16),
+                  _buildPlanInfo(),
+                  const SizedBox(height: 24),
+                  _buildDayPicker(),
+                  const SizedBox(height: 12),
+                  FutureBuilder<DietPlanDetailPayload>(
+                    future: _futureDetail,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
+                        return const Center(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(vertical: 32),
+                            child: CircularProgressIndicator(),
+                          ),
+                        );
+                      }
 
-                  final breakfast = _mealForType(payload, 1);
-                  final lunch = _mealForType(payload, 2);
-                  final dinner = _mealForType(payload, 3);
-
-                  if (snapshot.connectionState != ConnectionState.done) {
-                    return const Center(
-                      child: Padding(
-                        padding: EdgeInsets.only(top: 80),
-                        child: CircularProgressIndicator(),
-                      ),
-                    );
-                  }
-
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildHeader(),
-                      const SizedBox(height: 16),
-                      _buildPlanInfo(),
-                      const SizedBox(height: 24),
-                      _buildDayPicker(),
-                      const SizedBox(height: 12),
-                      _buildMealSection('早', '早餐', '清爽开局', breakfast?.title ?? '—', breakfast?.desc ?? '—', onTap: breakfast?.action),
-                      const SizedBox(height: 12),
-                      _buildMealSection('午', '午餐', '稳稳饱腹', lunch?.title ?? '—', lunch?.desc ?? '—', onTap: lunch?.action),
-                      const SizedBox(height: 12),
-                      _buildMealSection('晚', '晚餐', '轻一点', dinner?.title ?? '—', dinner?.desc ?? '—', onTap: dinner?.action),
-                      const SizedBox(height: 24),
-                      _buildPlanNotes(),
-                      const SizedBox(height: 32),
-                    ],
-                  );
-                },
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ..._buildAllMealSections(snapshot.data),
+                        ],
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 24),
+                  _buildPlanNotes(),
+                  const SizedBox(height: 32),
+                ],
               ),
             ),
           ),
@@ -280,14 +248,25 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
     );
   }
 
+  List<Widget> _buildAllMealSections(DietPlanDetailPayload? payload) {
+    return _mealTypeLabels.entries.map((entry) {
+      final type = entry.key;
+      final info = entry.value;
+      final items = _itemsForType(payload, type);
+      
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: _buildMealSection(info.icon, info.title, info.subtitle, items),
+      );
+    }).toList();
+  }
+
   Widget _buildMealSection(
     String icon,
     String title,
     String subtitle,
-    String mealTitle,
-    String mealDesc, {
-    VoidCallback? onTap,
-  }) {
+    List<DietPlanDetailItem> items,
+  ) {
     return CardContainer(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -323,36 +302,122 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
             ],
           ),
           const SizedBox(height: 12),
-          GestureDetector(
-            onTap: onTap,
-            child: Container(
+          if (items.isEmpty)
+            Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppColors.rose50.withValues(alpha: 0.3),
+                color: AppColors.rose50.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(22),
-                border: Border.all(color: AppColors.rose100.withValues(alpha: 0.7)),
+                border: Border.all(color: AppColors.rose100.withValues(alpha: 0.3)),
               ),
-              child: Row(
+              child: Center(
+                child: Text('暂无安排', style: TextStyle(fontSize: 14, color: AppColors.slate500)),
+              ),
+            )
+          else
+            ...items.map((item) => Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: _buildMealItem(item),
+            )),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMealItem(DietPlanDetailItem item) {
+    final isRecipe = item.sourceType == 'recipe';
+    final typeLabel = isRecipe ? '菜' : '食';
+    final typeColor = isRecipe ? AppColors.brand500 : const Color(0xFFF59E0B);
+
+    VoidCallback? onTap;
+    if (isRecipe) {
+      onTap = () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => RecipeDetailScreen(
+                caipinId: item.sourceId,
+                fallbackTitle: item.sourceName,
+                fallbackDesc: '',
+                fallbackImageUrl: '',
+              ),
+            ),
+          );
+    } else if (item.sourceType == 'food') {
+      onTap = () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => FoodDetailScreen(
+                foodId: item.sourceId,
+                name: item.sourceName,
+                thumbImageUrl: null,
+              ),
+            ),
+          );
+    }
+
+    final remark = item.remark.trim();
+    final hasRemark = remark.isNotEmpty;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: AppColors.rose50.withValues(alpha: 0.3),
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: AppColors.rose100.withValues(alpha: 0.7)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: typeColor.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Center(
+                child: Text(typeLabel, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: typeColor, height: 1)),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: Image.network('https://placehold.co/200x200/png?text=%E9%A3%9F%E8%B0%B1', width: 48, height: 48, fit: BoxFit.cover, errorBuilder: (_, __, ___) => _placeholder()),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(item.sourceName, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800)),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(mealTitle, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800)),
-                        Text(mealDesc, style: TextStyle(fontSize: 12, color: AppColors.slate600)),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.8),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text('${item.qty}${item.unit}', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.slate600)),
+                      ),
+                      if (hasRemark) ...[
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(remark, style: TextStyle(fontSize: 11, color: AppColors.slate500), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        ),
                       ],
-                    ),
+                    ],
                   ),
                 ],
               ),
             ),
-          ),
-        ],
+            const SizedBox(width: 4),
+            Icon(Icons.chevron_right, size: 18, color: AppColors.slate500.withValues(alpha: 0.4)),
+          ],
+        ),
       ),
     );
   }
@@ -400,10 +465,10 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
   Widget _placeholder() => Container(width: 80, height: 80, color: AppColors.slate200, child: const Icon(Icons.image_not_supported));
 }
 
-class _DietMeal {
+class _MealTypeInfo {
+  final String icon;
   final String title;
-  final String desc;
-  final VoidCallback? action;
+  final String subtitle;
 
-  const _DietMeal({required this.title, required this.desc, required this.action});
+  const _MealTypeInfo({required this.icon, required this.title, required this.subtitle});
 }
